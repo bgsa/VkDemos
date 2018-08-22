@@ -36,16 +36,29 @@
             "args": [
                 "-g",
                 "-Wall",
-                "..\\src\\Laucher.cpp",
+                "..\\src\\*.cpp",
+                "-I.\\..\\include",
+                "-L.\\..\\lib\\x86\\Debug",
+                "-lglfw3dll",
                 "-o",
                 "VkDemo.exe"
             ],
+            "dependsOn": [
+                "Make-Build-Dir-Windows"
+            ]
+        },
+        {
+            "label": "Post-Build-Windows",
+            "options": {
+                "cwd": "${workspaceRoot}\\build"
+            },
+            "command": "xcopy ${workspaceRoot}\\lib\\x86\\Debug\\*.dll .",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "dependsOn": [
-                "Make-Build-Dir-Windows"
+                "Build-Windows"
             ]
         }
     ]

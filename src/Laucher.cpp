@@ -1,9 +1,14 @@
-#include <iostream>
+#include "Window.h"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    cout << "Hello World";
+    VkDemos::Window *window = new VkDemos::Window;
+
+    window->init();
+
+    delete window;
+
     return 0;
 }

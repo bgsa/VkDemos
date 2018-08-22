@@ -1,14 +1,13 @@
 {
     "version": "0.2.0",
-    "configurations": [            
+    "configurations": [
         {
             "name": "Debug-Windows",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/VkDemo.exe",
-            "args": [],
-            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/build/VkDemo.exe",
+            "stopAtEntry": false,
             "environment": [],
             "externalConsole": true,
             "miDebuggerPath": "C:\\Users\\Bruno\\Projects\\Tools\\MinGW\\bin\\gdb.exe",
@@ -19,16 +18,15 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "Build-Windows"
+            "preLaunchTask": "Post-Build-Windows"
         },
         {
             "name": "Debug-Linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/PixelEffectLinuxApp",
-            "args": [],
-            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/build/PixelEffectLinuxApp",
+            "stopAtEntry": false,
             "environment": [],
             "externalConsole": true,
             "MIMode": "gdb",
