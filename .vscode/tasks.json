@@ -1,0 +1,52 @@
+{
+    "version": "2.0.0",
+    "type": "shell",
+    "tasks": [
+        {
+            "label": "Clean-Linux",
+            "command": "clear && mkdir -p ${workspaceRoot}/build/ && rm -rf ${workspaceRoot}/build/*",
+        },
+        {
+            "label": "Clean-Windows",
+            "command": "cls",
+        },
+        {
+            "label": "Delete-Build-Dir-Windows",
+            "command": "if (Test-Path \"${workspaceRoot}\\build\") { Remove-Item \"${workspaceRoot}\\build\" -Force -Recurse } ",
+            "dependsOn": [
+                "Clean-Windows"
+            ]
+        },
+        {
+            "label": "Make-Build-Dir-Windows",
+            "command": "mkdir",
+            "args": [
+                "${workspaceRoot}\\build"
+            ],
+            "dependsOn": [
+                "Delete-Build-Dir-Windows"
+            ]
+        },
+        {
+            "label": "Build-Windows",
+            "options": {
+                "cwd": "${workspaceRoot}\\build"
+            },
+            "command": "g++",
+            "args": [
+                "-g",
+                "-Wall",
+                "..\\src\\Laucher.cpp",
+                "-o",
+                "VkDemo.exe"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "Make-Build-Dir-Windows"
+            ]
+        }
+    ]
+}
