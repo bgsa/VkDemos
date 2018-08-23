@@ -4,10 +4,6 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/PixelEffect/PixelEffect.Shared",
-                "${workspaceFolder}/PixelEffect/PixelEffect.Framework",
-                "${workspaceFolder}/PixelEffect/PixelEffect.UI",
-                "${workspaceFolder}/PixelEffect/PixelEffect.Linux",
                 "/usr/include",
                 "/usr/include/c++/5",
                 "/usr/include/x86_64-linux-gnu/c++/5",
@@ -54,7 +50,7 @@
             "intelliSenseMode": "msvc-x64",
             "browse": {
                 "path": [
-                    "${workspaceFolder}/include"                    
+                    "${workspaceFolder}/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },

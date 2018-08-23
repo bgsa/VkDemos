@@ -36,10 +36,13 @@
             "args": [
                 "-g",
                 "-Wall",
+                "-std=c++11",
+                "-fexceptions",
                 "..\\src\\*.cpp",
                 "-I.\\..\\include",
                 "-L.\\..\\lib\\x86\\Debug",
                 "-lglfw3dll",
+                "-lvulkan-1",
                 "-o",
                 "VkDemo.exe"
             ],

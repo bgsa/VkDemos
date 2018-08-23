@@ -1,14 +1,24 @@
-#include "Window.h"
+#include <iostream>
+#include "Application.h"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    VkDemos::Window *window = new VkDemos::Window;
+    VkDemos::Application *application = new VkDemos::Application;
 
-    window->init();
+    try
+    {
+        application->run();
+    }
+    catch (const exception &e)
+    {
+        VkDemos::VkLogger::error(e);
+        delete application;
+        return -1;
+    }
 
-    delete window;
+    delete application;
 
     return 0;
 }

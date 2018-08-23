@@ -9,4 +9,9 @@
         "**/build": true,
         "**/.gitignore": true
     },
+    "files.associations": {
+        "string": "cpp",
+        "xstring": "cpp",
+        "vector": "cpp"
+    },
 }

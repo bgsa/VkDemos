@@ -1,41 +1,46 @@
 #include "Window.h"
-#include <iostream>
 
 namespace VkDemos
 {
 
-static void error_callback(int error, const char *description)
+void Window::setup(VkDemos::WindowInfo &windowInfo)
 {
-    fputs(description, stderr);
-}
-
-void Window::init()
-{
-    glfwSetErrorCallback(error_callback);
+    glfwSetErrorCallback(VkDemos::VkLogger::error);
 
     if (!glfwInit())
         return;
 
-    windowHandler = glfwCreateWindow(800, 600, "WINDOW_NAME", NULL, NULL);
+    windowHandler = glfwCreateWindow(windowInfo.getWidth(), windowInfo.getHeight(), windowInfo.getWindowName().c_str(), NULL, NULL);
     if (!windowHandler)
     {
         glfwTerminate();
         return;
     }
 
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
     glfwSetWindowPos(windowHandler, 100, 100);
 
     glfwMakeContextCurrent(windowHandler);
 
-    glfwTerminate();
+    /*
+    while (!glfwWindowShouldClose(windowHandler))
+    {
+        glfwPollEvents();
+    }
+    */
 }
 
 Window::~Window()
 {
-    if (windowHandler != NULL)
+    if (windowHandler != nullptr)
+    {
         glfwDestroyWindow(windowHandler);
+        windowHandler = nullptr;
+    }
 
-    windowHandler = NULL;
+    glfwTerminate();
 }
 
 } // namespace VkDemos
