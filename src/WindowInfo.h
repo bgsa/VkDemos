@@ -11,7 +11,7 @@ private:
   string windowName;
   int width;
   int height;
-  bool isResizable = true;
+  bool resizable = false;
 
 public:
   WindowInfo(string windowName, int width, int height);

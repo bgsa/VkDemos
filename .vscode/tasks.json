@@ -38,6 +38,7 @@
                 "-Wall",
                 "-std=c++11",
                 "-fexceptions",
+                "-DDEBUG",
                 "..\\src\\*.cpp",
                 "-I.\\..\\include",
                 "-L.\\..\\lib\\x86\\Debug",

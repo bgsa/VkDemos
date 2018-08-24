@@ -39,11 +39,11 @@ void WindowInfo::setHeight(int height)
 
 bool WindowInfo::isResizable()
 {
-    return isResizable;
+    return resizable;
 }
 void WindowInfo::setResizable(bool isResizable)
 {
-    this->isResizable = isResizable;
+    this->resizable = isResizable;
 }
 
 } // namespace VkDemos

@@ -17,6 +17,9 @@ private:
 
 public:
   void setup(VkDemos::WindowInfo &windowInfo);
+  void update();
+  vector<string> getRequiredExtensions();
+  void printRequiredExtensions();
   ~Window();
 };
 

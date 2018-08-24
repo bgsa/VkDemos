@@ -3,6 +3,7 @@
 
 #include "Window.h"
 #include "VkExtensionsConfiguration.h"
+#include "VkValidationLayerConfiguration.h"
 
 namespace VkDemos
 {
@@ -10,14 +11,19 @@ namespace VkDemos
 class Application
 {
 
-  private:
-    VkDemos::Window *window;
+private:
+  VkDemos::Window *window;
+  VkInstance vulkanInstance;
 
-  public:
-    void run();
-    void exit();
+  void setupWindow();
+  void setupVulkan();
+  void setupDebugCallback();
 
-    ~Application();
+public:
+  void run();
+  void exit();
+
+  ~Application();
 };
 
 } // namespace VkDemos

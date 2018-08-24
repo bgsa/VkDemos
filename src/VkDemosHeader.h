@@ -5,7 +5,10 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan.h>
+
 #include "VkLogger.hpp"
+
+#include "VectorHelper.hpp"
 
 using namespace std;
 

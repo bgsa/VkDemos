@@ -30,9 +30,42 @@ class VkLogger
         cout << "Info: " << message << endl;
     }
 
+    static void info(const string message)
+    {
+        cout << "Info: " << message << endl;
+    }
+
     static void debug(const char *message)
     {
         cout << "Debug: " << message << endl;
+    }
+
+    static ostream &getOutputStream()
+    {
+        return cout;
+    }
+
+    static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+        void *pUserData)
+    {
+        string infoLevel = "Info: ";
+
+        if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+            infoLevel = "Warning: ";
+        else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+            infoLevel = "Error: ";
+
+        cout
+            << infoLevel << "Validation layer: " << endl
+            << "    Message Type: " << messageType << endl
+            << "    Message Id: " << pCallbackData->pMessageIdName << endl
+            << "    Massage: " << pCallbackData->pMessage << endl
+            << "    Callback Type: " << pCallbackData->sType << endl;
+
+        return VK_FALSE;
     }
 };
 } // namespace VkDemos

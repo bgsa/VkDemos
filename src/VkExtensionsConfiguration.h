@@ -9,9 +9,11 @@ namespace VkDemos
 {
 class VkExtensionsConfiguration
 {
-  public:
-    static vector<VkExtensionProperties> getSupportedExtensions();
-    static void printSupportedExtensions();
+public:
+  static uint32_t getSupportedExtensionsCount();
+  static vector<VkExtensionProperties> getSupportedExtensions();
+  static bool isExtensionSupported(string extensionName);
+  static void printSupportedExtensions();
 };
 } // namespace VkDemos
 
