@@ -4,7 +4,7 @@ namespace VkDemos
 {
 static VkDebugUtilsMessengerEXT debugMessager;
 
-uint32_t VkValidationLayerConfiguration::getValidationLayersSupportedCount()
+uint32_t VkValidationLayerConfiguration::getInstanceLayersSupportedCount()
 {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -12,9 +12,9 @@ uint32_t VkValidationLayerConfiguration::getValidationLayersSupportedCount()
     return layerCount;
 }
 
-vector<VkLayerProperties> VkValidationLayerConfiguration::getValidationLayersSupported()
+vector<VkLayerProperties> VkValidationLayerConfiguration::getInstanceLayersSupported()
 {
-    uint32_t layerCount = getValidationLayersSupportedCount();
+    uint32_t layerCount = getInstanceLayersSupportedCount();
 
     vector<VkLayerProperties> availableLayers(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
@@ -22,19 +22,19 @@ vector<VkLayerProperties> VkValidationLayerConfiguration::getValidationLayersSup
     return availableLayers;
 }
 
-void VkValidationLayerConfiguration::printValidationLayersSupported()
+void VkValidationLayerConfiguration::printInstanceLayersSupported()
 {
-    vector<VkLayerProperties> validationLayers = VkValidationLayerConfiguration::getValidationLayersSupported();
+    vector<VkLayerProperties> validationLayers = VkValidationLayerConfiguration::getInstanceLayersSupported();
 
-    VkLogger::getOutputStream() << validationLayers.size() << " validation layers available:" << endl;
+    VkLogger::getOutputStream() << validationLayers.size() << " instance layers available:" << endl;
 
     for (const auto &layer : validationLayers)
         VkLogger::info(layer.layerName);
 }
 
-bool VkValidationLayerConfiguration::isValidationLayerSupported(const string &validationLayerName)
+bool VkValidationLayerConfiguration::isInstanceLayerSupported(const string &validationLayerName)
 {
-    vector<VkLayerProperties> validationLayers = VkValidationLayerConfiguration::getValidationLayersSupported();
+    vector<VkLayerProperties> validationLayers = VkValidationLayerConfiguration::getInstanceLayersSupported();
 
     for (const auto &layer : validationLayers)
         if (layer.layerName == validationLayerName)

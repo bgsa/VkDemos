@@ -18,8 +18,8 @@ private:
 public:
   void setup(VkDemos::WindowInfo &windowInfo);
   void update();
-  vector<string> getRequiredExtensions();
-  VkSurfaceKHR *createSurface(const VkInstance &vulkanInstance);
+  vector<const char *> getRequiredExtensions();
+  void createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface);
   void printRequiredExtensions();
   ~Window();
 };

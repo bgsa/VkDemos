@@ -31,6 +31,12 @@ class VectorHelper
         return result;
     }
 
+    static void convertToCharArrayVector(const std::vector<string> &vector, std::vector<const char *> &newVector)
+    {
+        for (std::string value : vector)
+            newVector.push_back(value.c_str());
+    }
+
     template <typename T>
     static void printContent(const vector<T> &vector)
     {

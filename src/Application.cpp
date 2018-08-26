@@ -11,21 +11,18 @@ void Application::run()
     setupVulkan();
     setupSurface();
 
-    // cria dispositivo lógico e pega fila da família gráfica
     VkPhysicalDeviceManager deviceManager(vulkanInstance);
+    vector<const char *> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+
     VkPhysicalDevice physicalDevice = deviceManager.findSuitableGraphicalDevice();
 
-    vector<string> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
-    VectorHelper::printContent(requiredExtensions);
     device = VkLogicalDevice::createLogicalDevice(physicalDevice, surface, requiredExtensions);
 
-    //pega fila de graficos
-    uint32_t graphicQueueFamilyIndex = VkQueueFamily::getGraphicQueueFamilyIndex(physicalDevice);
-    vkGetDeviceQueue(*device, graphicQueueFamilyIndex, 0, &graphicsQueue);
+    //create queue families
+    queueFamily = VkQueueFamily::createQueueFamily(physicalDevice, *device, surface);
 
-    //cria fila de apresentação
-    uint32_t presentQueueFamilyIndex = VkQueueFamily::getSurfaceQueueFamilyIndex(physicalDevice, surface);
-    vkGetDeviceQueue(*device, presentQueueFamilyIndex, 0, &presentQueue);
+    //cria swap chain
+    swapChain = VkSwapChain::createSwapChain(physicalDevice, *device, surface, *queueFamily);
 }
 
 void Application::setupDebugCallback()
@@ -52,21 +49,20 @@ void Application::setupDebugCallback()
 
 void Application::setupSurface()
 {
-    surface = window->createSurface(vulkanInstance);
+    window->createSurface(vulkanInstance, &surface);
 }
 
 void Application::setupVulkan()
 {
-    auto extensionsRequired = window->getRequiredExtensions();
+    std::vector<const char *> extensionsRequired = window->getRequiredExtensions();
 
 #if DEBUG
     VkExtensionsConfiguration::printSupportedExtensions();
-    VkValidationLayerConfiguration::printValidationLayersSupported();
+    window->printRequiredExtensions();
+    VkValidationLayerConfiguration::printInstanceLayersSupported();
 
     extensionsRequired.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
-
-    char **extensions = VectorHelper::convertToCharArray(extensionsRequired);
 
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -80,18 +76,17 @@ void Application::setupVulkan()
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsRequired.size());
-    createInfo.ppEnabledExtensionNames = extensions;
+    createInfo.ppEnabledExtensionNames = extensionsRequired.data();
+    createInfo.enabledLayerCount = 0;
 
 #if DEBUG
     const vector<const char *> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
 
-    if (VkValidationLayerConfiguration::isValidationLayerSupported(validationLayers[0]))
+    if (VkValidationLayerConfiguration::isInstanceLayerSupported(validationLayers[0]))
     {
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
     }
-    else
-        createInfo.enabledLayerCount = 0;
 #endif
 
     VkResult operationResult = vkCreateInstance(&createInfo, nullptr, &vulkanInstance);
@@ -118,16 +113,28 @@ void Application::exit()
     VkValidationLayerConfiguration::destroyDebugUtilsMessengerEXT(vulkanInstance, nullptr);
 #endif
 
+    if (swapChain != nullptr)
+    {
+        vkDestroySwapchainKHR(*device, swapChain->vulkanSwapChain, nullptr);
+        swapChain = nullptr;
+    }
+
+    if (queueFamily != nullptr)
+    {
+        delete queueFamily;
+        queueFamily = nullptr;
+    }
+
     if (device != nullptr)
     {
         vkDestroyDevice(*device, nullptr);
         device = nullptr;
     }
 
-    if (surface != nullptr)
+    //if (surface != nullptr)
     {
-        vkDestroySurfaceKHR(vulkanInstance, *surface, nullptr);
-        surface = nullptr;
+        vkDestroySurfaceKHR(vulkanInstance, surface, nullptr);
+        //surface = nullptr;
     }
 
     if (vulkanInstance != nullptr)

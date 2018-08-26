@@ -59,7 +59,7 @@ class VkLogger
             infoLevel = "Error: ";
 
         cout
-            << infoLevel << "Validation layer: " << endl
+            << infoLevel << "Instance layer: " << endl
             << "    Message Type: " << messageType << endl
             << "    Message Id: " << pCallbackData->pMessageIdName << endl
             << "    Massage: " << pCallbackData->pMessage << endl

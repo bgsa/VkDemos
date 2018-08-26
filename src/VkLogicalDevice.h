@@ -10,8 +10,8 @@ namespace VkDemos
 class VkLogicalDevice
 {
 public:
-  static VkDevice *createLogicalDevice(const VkInstance &vulkanInstance, VkSurfaceKHR *surface, vector<string> extensions);
-  static VkDevice *createLogicalDevice(const VkPhysicalDevice &physicalDevice, VkSurfaceKHR *surface, vector<string> extensions);
+  static VkDevice *createLogicalDevice(const VkInstance &vulkanInstance, const VkSurfaceKHR &surface, const vector<const char *> &extensions);
+  static VkDevice *createLogicalDevice(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const vector<const char *> &extensions);
 };
 } // namespace VkDemos
 

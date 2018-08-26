@@ -15,6 +15,7 @@
 #include "VkLogger.hpp"
 #include "VectorHelper.hpp"
 #include "SetHelper.hpp"
+#include "VkHelper.hpp"
 
 using namespace std;
 

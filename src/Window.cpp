@@ -1,16 +1,14 @@
 #include "Window.h"
 
+#include <glfw/glfw3native.h>
+
 namespace VkDemos
 {
 
-VkSurfaceKHR *Window::createSurface(const VkInstance &vulkanInstance)
+void Window::createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface)
 {
-    VkSurfaceKHR *surface = new VkSurfaceKHR;
-
     if (glfwCreateWindowSurface(vulkanInstance, windowHandler, nullptr, surface) != VK_SUCCESS)
         throw runtime_error("failed to create window surface!");
-
-    return surface;
 }
 
 void Window::setup(VkDemos::WindowInfo &windowInfo)
@@ -20,15 +18,15 @@ void Window::setup(VkDemos::WindowInfo &windowInfo)
     if (!glfwInit())
         throw runtime_error("failed to init GLFW!");
 
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, windowInfo.isResizable());
+
     windowHandler = glfwCreateWindow(windowInfo.getWidth(), windowInfo.getHeight(), windowInfo.getWindowName().c_str(), NULL, NULL);
     if (!windowHandler)
     {
         glfwTerminate();
         throw runtime_error("failed to create GLFW window!");
     }
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, windowInfo.isResizable());
 
     glfwSetWindowPos(windowHandler, 100, 100);
 
@@ -43,15 +41,13 @@ void Window::update()
     glfwPollEvents();
 }
 
-vector<string> Window::getRequiredExtensions()
+vector<const char *> Window::getRequiredExtensions()
 {
-    uint32_t extensionCount;
-    const char **requiredExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+    uint32_t glfwExtensionCount = 0;
+    const char **glfwExtensions;
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-    vector<string> extensions(extensionCount);
-
-    for (size_t i = 0; i < extensionCount; i++)
-        extensions[i] = string(requiredExtensions[i]);
+    std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
     return extensions;
 }

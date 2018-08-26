@@ -50,7 +50,7 @@ uint32_t VkQueueFamily::getGraphicQueueFamilyIndex(const VkPhysicalDevice &physi
     return -1;
 }
 
-uint32_t VkQueueFamily::getSurfaceQueueFamilyIndex(const VkPhysicalDevice &physicalDevice, VkSurfaceKHR *surface)
+uint32_t VkQueueFamily::getSurfaceQueueFamilyIndex(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface)
 {
     vector<VkQueueFamilyProperties> queueFamilies = VkQueueFamily::getQueueFamilies(physicalDevice);
 
@@ -60,13 +60,29 @@ uint32_t VkQueueFamily::getSurfaceQueueFamilyIndex(const VkPhysicalDevice &physi
             return false;
 
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, *surface, &presentSupport);
+        VkResult operationResult = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+
+        if (operationResult != VK_SUCCESS)
+            throw std::runtime_error("failed to get physical device surface support");
 
         if (presentSupport)
             return i;
     }
 
     return -1;
+}
+
+VkQueueFamily *VkQueueFamily::createQueueFamily(const VkPhysicalDevice &physicalDevice, const VkDevice &device, const VkSurfaceKHR &surface)
+{
+    VkQueueFamily *queueFamily = new VkQueueFamily;
+
+    queueFamily->graphicsQueueIndex = VkQueueFamily::getGraphicQueueFamilyIndex(physicalDevice);
+    vkGetDeviceQueue(device, queueFamily->graphicsQueueIndex, 0, &queueFamily->graphicsQueue);
+
+    queueFamily->presentQueueIndex = VkQueueFamily::getSurfaceQueueFamilyIndex(physicalDevice, surface);
+    vkGetDeviceQueue(device, queueFamily->presentQueueIndex, 0, &queueFamily->presentQueue);
+
+    return queueFamily;
 }
 
 } // namespace VkDemos

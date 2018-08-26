@@ -21,7 +21,7 @@ void WindowInfo::setWindowName(string windowName)
 
 int WindowInfo::getWidth()
 {
-    return height;
+    return width;
 }
 void WindowInfo::setWidth(int width)
 {

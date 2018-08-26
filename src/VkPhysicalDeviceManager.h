@@ -18,8 +18,8 @@ public:
   vector<VkPhysicalDevice> getSupportedDevices();
   vector<VkPhysicalDevice> findGraphicalDevices();
   VkPhysicalDevice findSuitableGraphicalDevice();
-  VkPhysicalDevice findSuitableGraphicalDevice(vector<string> requiredExtensions);
-  VkPhysicalDevice findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices, vector<string> requiredExtensions);
+  VkPhysicalDevice findSuitableGraphicalDevice(vector<const char *> requiredExtensions);
+  VkPhysicalDevice findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices, vector<const char *> requiredExtensions);
   VkPhysicalDeviceProperties getProperties(const VkPhysicalDevice &device);
   VkPhysicalDeviceFeatures getFeatures(const VkPhysicalDevice &device);
   bool isGpuDevice(const VkPhysicalDevice &device);
@@ -28,9 +28,9 @@ public:
   static string getPhysicalTypeDescription(VkPhysicalDeviceType deviceType);
   static vector<VkExtensionProperties> getSupportedExtensions(const VkPhysicalDevice &physicalDevice);
   static bool hasSupportedExtension(const VkPhysicalDevice &physicalDevice, string extensionName);
-  static bool hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, vector<string> extensionsName);
+  static bool hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, vector<const char *> extensionsName);
   void printSupportedDevices();
-  static vector<string> getRequiredExtensionsForGraphic();
+  static vector<const char *> getRequiredExtensionsForGraphic();
 };
 } // namespace VkDemos
 

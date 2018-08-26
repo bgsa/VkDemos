@@ -46,14 +46,14 @@ vector<VkPhysicalDevice> VkPhysicalDeviceManager::findGraphicalDevices()
 VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice()
 {
     vector<VkPhysicalDevice> devices = findGraphicalDevices();
-    vector<string> deviceExtensionsRequired = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+    vector<const char *> deviceExtensionsRequired = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
 
     VkPhysicalDevice device = findSuitableGraphicalDevice(devices, deviceExtensionsRequired);
 
     return device;
 }
 
-VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<string> requiredExtensions)
+VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<const char *> requiredExtensions)
 {
     vector<VkPhysicalDevice> devices = findGraphicalDevices();
     VkPhysicalDevice device = findSuitableGraphicalDevice(devices, requiredExtensions);
@@ -61,9 +61,9 @@ VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<str
     return device;
 }
 
-VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices, vector<string> requiredExtensions)
+VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices, vector<const char *> requiredExtensions)
 {
-    size_t suitableDevice = -1;
+    int suitableDevice = -1;
 
     for (size_t i = 0; i != devices.size(); i++)
     {
@@ -93,24 +93,36 @@ VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkP
             suitableDevice = 100;
     }
 
+    if (suitableDevice == -1)
+        throw std::runtime_error("suitable device not found");
+
     VkPhysicalDevice device = devices[suitableDevice];
 
     return device;
 }
 
-bool VkPhysicalDeviceManager::hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, vector<string> extensionsName)
+bool VkPhysicalDeviceManager::hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, vector<const char *> requiredExtensions)
 {
     vector<VkExtensionProperties> availableExtensions = VkPhysicalDeviceManager::getSupportedExtensions(physicalDevice);
-    vector<string>::iterator item;
 
-    for (const auto &extension : availableExtensions)
+    for (const char *requiredExtension : requiredExtensions)
     {
-        item = find(extensionsName.begin(), extensionsName.end(), extension.extensionName);
-        if (item != extensionsName.end())
-            extensionsName.erase(item);
+        bool found = false;
+
+        for (const auto &extension : availableExtensions)
+        {
+            if (string(extension.extensionName) == string(requiredExtension))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            return false;
     }
 
-    return extensionsName.empty();
+    return true;
 }
 
 bool VkPhysicalDeviceManager::hasSupportedExtension(const VkPhysicalDevice &physicalDevice, string extensionName)
@@ -204,9 +216,9 @@ string VkPhysicalDeviceManager::getPhysicalTypeDescription(VkPhysicalDeviceType 
         return "Unknown";
 }
 
-vector<string> VkPhysicalDeviceManager::getRequiredExtensionsForGraphic()
+vector<const char *> VkPhysicalDeviceManager::getRequiredExtensionsForGraphic()
 {
-    vector<string> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    vector<const char *> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     return extensions;
 }
 

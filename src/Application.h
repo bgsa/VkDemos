@@ -6,6 +6,7 @@
 #include "VkValidationLayerConfiguration.h"
 #include "VkPhysicalDeviceManager.h"
 #include "VkLogicalDevice.h"
+#include "VkSwapChain.h"
 
 namespace VkDemos
 {
@@ -15,11 +16,11 @@ class Application
 
 private:
   VkDemos::Window *window = nullptr;
-  VkInstance vulkanInstance;
+  VkInstance vulkanInstance = VK_NULL_HANDLE;
   VkDevice *device = nullptr;
-  VkSurfaceKHR *surface = nullptr;
-  VkQueue graphicsQueue;
-  VkQueue presentQueue;
+  VkSurfaceKHR surface = VK_NULL_HANDLE;
+  VkQueueFamily *queueFamily = nullptr;
+  VkSwapChain *swapChain = nullptr;
 
   void setupWindow();
   void setupVulkan();
