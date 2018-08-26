@@ -3,22 +3,24 @@
 namespace VkDemos
 {
 
-VkDevice *VkLogicalDevice::createLogicalDevice(const VkInstance &vulkanInstance, VkSurfaceKHR *surface)
+VkDevice *VkLogicalDevice::createLogicalDevice(const VkInstance &vulkanInstance, VkSurfaceKHR *surface, vector<string> extensions)
 {
     VkPhysicalDeviceManager deviceManager(vulkanInstance);
 
-    VkPhysicalDevice physicalDevice = deviceManager.findSuitableGraphicalDevice();
+    VkPhysicalDevice physicalDevice = deviceManager.findSuitableGraphicalDevice(extensions);
 
-    VkDevice *device = createLogicalDevice(physicalDevice, surface);
+    VkDevice *device = createLogicalDevice(physicalDevice, surface, extensions);
 
     return device;
 }
 
-VkDevice *VkLogicalDevice::createLogicalDevice(const VkPhysicalDevice &physicalDevice, VkSurfaceKHR *surface)
+VkDevice *VkLogicalDevice::createLogicalDevice(const VkPhysicalDevice &physicalDevice, VkSurfaceKHR *surface, vector<string> extensions)
 {
     uint32_t graphicQueueIndex = VkQueueFamily::getGraphicQueueFamilyIndex(physicalDevice);
     uint32_t presentQueueIndex = VkQueueFamily::getSurfaceQueueFamilyIndex(physicalDevice, surface);
     set<uint32_t> queueFamilies = {graphicQueueIndex, presentQueueIndex};
+
+    char **extensionsAsArray = VectorHelper::convertToCharArray(extensions);
 
     float queuePriority = 1.0f;
 
@@ -32,13 +34,6 @@ VkDevice *VkLogicalDevice::createLogicalDevice(const VkPhysicalDevice &physicalD
         queueCreateInfo.pQueuePriorities = &queuePriority;
         queueInfos.push_back(queueCreateInfo);
     }
-    /*
-    VkDeviceQueueCreateInfo queueCreateInfo = {};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = queueIndex;
-    queueCreateInfo.queueCount = 1;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
-    */
 
     VkPhysicalDeviceFeatures deviceFeaturesRequired = {};
 
@@ -48,7 +43,8 @@ VkDevice *VkLogicalDevice::createLogicalDevice(const VkPhysicalDevice &physicalD
     createInfo.pEnabledFeatures = &deviceFeaturesRequired;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
     createInfo.pQueueCreateInfos = queueInfos.data();
-    //createInfo.pQueueCreateInfos = &queueCreateInfo;
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    createInfo.ppEnabledExtensionNames = extensionsAsArray;
 
 #if DEBUG
     const vector<const char *> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};

@@ -43,7 +43,25 @@ vector<VkPhysicalDevice> VkPhysicalDeviceManager::findGraphicalDevices()
     return graphicalDevices;
 }
 
-VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices)
+VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice()
+{
+    vector<VkPhysicalDevice> devices = findGraphicalDevices();
+    vector<string> deviceExtensionsRequired = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+
+    VkPhysicalDevice device = findSuitableGraphicalDevice(devices, deviceExtensionsRequired);
+
+    return device;
+}
+
+VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<string> requiredExtensions)
+{
+    vector<VkPhysicalDevice> devices = findGraphicalDevices();
+    VkPhysicalDevice device = findSuitableGraphicalDevice(devices, requiredExtensions);
+
+    return device;
+}
+
+VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices, vector<string> requiredExtensions)
 {
     size_t suitableDevice = -1;
 
@@ -51,6 +69,11 @@ VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkP
     {
         VkPhysicalDevice device = devices[i];
         VkPhysicalDeviceProperties deviceProperties = getProperties(device);
+
+        bool hasExtensionsSupport = VkPhysicalDeviceManager::hasSupportedExtensions(device, requiredExtensions);
+
+        if (!hasExtensionsSupport)
+            continue;
 
         if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
         {
@@ -70,15 +93,46 @@ VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkP
             suitableDevice = 100;
     }
 
-    return devices[suitableDevice];
-}
-
-VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice()
-{
-    vector<VkPhysicalDevice> devices = findGraphicalDevices();
-    VkPhysicalDevice device = findSuitableGraphicalDevice(devices);
+    VkPhysicalDevice device = devices[suitableDevice];
 
     return device;
+}
+
+bool VkPhysicalDeviceManager::hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, vector<string> extensionsName)
+{
+    vector<VkExtensionProperties> availableExtensions = VkPhysicalDeviceManager::getSupportedExtensions(physicalDevice);
+    vector<string>::iterator item;
+
+    for (const auto &extension : availableExtensions)
+    {
+        item = find(extensionsName.begin(), extensionsName.end(), extension.extensionName);
+        if (item != extensionsName.end())
+            extensionsName.erase(item);
+    }
+
+    return extensionsName.empty();
+}
+
+bool VkPhysicalDeviceManager::hasSupportedExtension(const VkPhysicalDevice &physicalDevice, string extensionName)
+{
+    vector<VkExtensionProperties> availableExtensions = VkPhysicalDeviceManager::getSupportedExtensions(physicalDevice);
+
+    for (const auto &extension : availableExtensions)
+        if (extension.extensionName == extensionName)
+            return true;
+
+    return false;
+}
+
+vector<VkExtensionProperties> VkPhysicalDeviceManager::getSupportedExtensions(const VkPhysicalDevice &physicalDevice)
+{
+    uint32_t extensionCount;
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
+
+    vector<VkExtensionProperties> supportedExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, supportedExtensions.data());
+
+    return supportedExtensions;
 }
 
 void VkPhysicalDeviceManager::printSupportedDevices()
@@ -148,6 +202,12 @@ string VkPhysicalDeviceManager::getPhysicalTypeDescription(VkPhysicalDeviceType 
         return "CPU";
     else
         return "Unknown";
+}
+
+vector<string> VkPhysicalDeviceManager::getRequiredExtensionsForGraphic()
+{
+    vector<string> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    return extensions;
 }
 
 } // namespace VkDemos

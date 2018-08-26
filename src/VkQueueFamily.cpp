@@ -54,8 +54,6 @@ uint32_t VkQueueFamily::getSurfaceQueueFamilyIndex(const VkPhysicalDevice &physi
 {
     vector<VkQueueFamilyProperties> queueFamilies = VkQueueFamily::getQueueFamilies(physicalDevice);
 
-    VkLogger::getOutputStream() << "queue size: " << queueFamilies.size();
-
     for (uint32_t i = 0; i != queueFamilies.size(); i++)
     {
         if (queueFamilies[i].queueCount == 0)

@@ -9,23 +9,22 @@ void Application::run()
 {
     setupWindow();
     setupVulkan();
-
-    //cria surface
-    surface = window->createSurface(vulkanInstance);
+    setupSurface();
 
     // cria dispositivo lógico e pega fila da família gráfica
     VkPhysicalDeviceManager deviceManager(vulkanInstance);
     VkPhysicalDevice physicalDevice = deviceManager.findSuitableGraphicalDevice();
-    device = VkLogicalDevice::createLogicalDevice(physicalDevice, surface);
+
+    vector<string> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+    VectorHelper::printContent(requiredExtensions);
+    device = VkLogicalDevice::createLogicalDevice(physicalDevice, surface, requiredExtensions);
 
     //pega fila de graficos
-    VkQueue graphicsQueue;
     uint32_t graphicQueueFamilyIndex = VkQueueFamily::getGraphicQueueFamilyIndex(physicalDevice);
     vkGetDeviceQueue(*device, graphicQueueFamilyIndex, 0, &graphicsQueue);
 
     //cria fila de apresentação
-    VkQueue presentQueue;
-    uint32_t presentQueueFamilyIndex = VkQueueFamily::getSurfaceQueueFamilyIndex(physicalDevice);
+    uint32_t presentQueueFamilyIndex = VkQueueFamily::getSurfaceQueueFamilyIndex(physicalDevice, surface);
     vkGetDeviceQueue(*device, presentQueueFamilyIndex, 0, &presentQueue);
 }
 
@@ -49,6 +48,11 @@ void Application::setupDebugCallback()
 
     if (VkValidationLayerConfiguration::createDebugUtilsMessengerEXT(vulkanInstance, &createInfo, nullptr) != VK_SUCCESS)
         throw runtime_error("failed to set up debug callback!");
+}
+
+void Application::setupSurface()
+{
+    surface = window->createSurface(vulkanInstance);
 }
 
 void Application::setupVulkan()

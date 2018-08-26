@@ -20,6 +20,23 @@ class VectorHelper
 
         return array;
     }
+
+    static set<string> convertToSetString(const vector<const char *> &vector)
+    {
+        set<string> result;
+
+        for (size_t i = 0; i != vector.size(); i++)
+            result.insert(string(vector[i]));
+
+        return result;
+    }
+
+    template <typename T>
+    static void printContent(const vector<T> &vector)
+    {
+        for (T value : vector)
+            VkLogger::getOutputStream() << value << endl;
+    }
 };
 } // namespace VkDemos
 

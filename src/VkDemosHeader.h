@@ -9,10 +9,12 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <algorithm>
 #include <vulkan/vulkan.h>
 
 #include "VkLogger.hpp"
 #include "VectorHelper.hpp"
+#include "SetHelper.hpp"
 
 using namespace std;
 

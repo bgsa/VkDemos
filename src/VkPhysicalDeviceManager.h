@@ -17,15 +17,20 @@ public:
   uint32_t getSupportedDevicesCount();
   vector<VkPhysicalDevice> getSupportedDevices();
   vector<VkPhysicalDevice> findGraphicalDevices();
-  VkPhysicalDevice findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices);
   VkPhysicalDevice findSuitableGraphicalDevice();
+  VkPhysicalDevice findSuitableGraphicalDevice(vector<string> requiredExtensions);
+  VkPhysicalDevice findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices, vector<string> requiredExtensions);
   VkPhysicalDeviceProperties getProperties(const VkPhysicalDevice &device);
   VkPhysicalDeviceFeatures getFeatures(const VkPhysicalDevice &device);
   bool isGpuDevice(const VkPhysicalDevice &device);
   bool isCpuDevice(const VkPhysicalDevice &device);
   bool isVirtualGpuDevice(const VkPhysicalDevice &device);
   static string getPhysicalTypeDescription(VkPhysicalDeviceType deviceType);
+  static vector<VkExtensionProperties> getSupportedExtensions(const VkPhysicalDevice &physicalDevice);
+  static bool hasSupportedExtension(const VkPhysicalDevice &physicalDevice, string extensionName);
+  static bool hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, vector<string> extensionsName);
   void printSupportedDevices();
+  static vector<string> getRequiredExtensionsForGraphic();
 };
 } // namespace VkDemos
 

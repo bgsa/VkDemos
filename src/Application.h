@@ -18,9 +18,12 @@ private:
   VkInstance vulkanInstance;
   VkDevice *device = nullptr;
   VkSurfaceKHR *surface = nullptr;
+  VkQueue graphicsQueue;
+  VkQueue presentQueue;
 
   void setupWindow();
   void setupVulkan();
+  void setupSurface();
   void setupDebugCallback();
 
 public:
