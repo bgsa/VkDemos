@@ -28,7 +28,7 @@ void VkValidationLayerConfiguration::printValidationLayersSupported()
 
     VkLogger::getOutputStream() << validationLayers.size() << " validation layers available:" << endl;
 
-    for (auto layer : validationLayers)
+    for (const auto &layer : validationLayers)
         VkLogger::info(layer.layerName);
 }
 
@@ -36,7 +36,7 @@ bool VkValidationLayerConfiguration::isValidationLayerSupported(const string &va
 {
     vector<VkLayerProperties> validationLayers = VkValidationLayerConfiguration::getValidationLayersSupported();
 
-    for (auto layer : validationLayers)
+    for (const auto &layer : validationLayers)
         if (layer.layerName == validationLayerName)
             return true;
 

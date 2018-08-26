@@ -3,6 +3,16 @@
 namespace VkDemos
 {
 
+VkSurfaceKHR *Window::createSurface(const VkInstance &vulkanInstance)
+{
+    VkSurfaceKHR *surface = new VkSurfaceKHR;
+
+    if (glfwCreateWindowSurface(vulkanInstance, windowHandler, nullptr, surface) != VK_SUCCESS)
+        throw runtime_error("failed to create window surface!");
+
+    return surface;
+}
+
 void Window::setup(VkDemos::WindowInfo &windowInfo)
 {
     glfwSetErrorCallback(VkDemos::VkLogger::error);
@@ -51,7 +61,7 @@ void Window::printRequiredExtensions()
     auto requiredExtensions = getRequiredExtensions();
 
     VkLogger::info(requiredExtensions.size() + " extensions required to Window System:");
-    for (auto requiredExtension : requiredExtensions)
+    for (const auto &requiredExtension : requiredExtensions)
         VkLogger::info(requiredExtension);
 }
 

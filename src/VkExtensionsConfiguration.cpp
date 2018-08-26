@@ -26,7 +26,7 @@ bool VkExtensionsConfiguration::isExtensionSupported(string extensionName)
 {
   auto extensions = VkExtensionsConfiguration::getSupportedExtensions();
 
-  for (auto extension : extensions)
+  for (const auto &extension : extensions)
     if (string(extension.extensionName) == extensionName)
       return true;
 
@@ -39,7 +39,7 @@ void VkExtensionsConfiguration::printSupportedExtensions()
 
   VkLogger::getOutputStream() << extensions.size() << " extensions available:" << endl;
 
-  for (auto prop : extensions)
+  for (const auto &prop : extensions)
     VkLogger::getOutputStream() << prop.extensionName << " - (Specification Version " << prop.specVersion << ")" << endl;
 }
 

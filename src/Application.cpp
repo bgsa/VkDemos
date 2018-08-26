@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include "VkQueueFamily.h"
+
 namespace VkDemos
 {
 
@@ -7,6 +9,24 @@ void Application::run()
 {
     setupWindow();
     setupVulkan();
+
+    //cria surface
+    surface = window->createSurface(vulkanInstance);
+
+    // cria dispositivo lógico e pega fila da família gráfica
+    VkPhysicalDeviceManager deviceManager(vulkanInstance);
+    VkPhysicalDevice physicalDevice = deviceManager.findSuitableGraphicalDevice();
+    device = VkLogicalDevice::createLogicalDevice(physicalDevice, surface);
+
+    //pega fila de graficos
+    VkQueue graphicsQueue;
+    uint32_t graphicQueueFamilyIndex = VkQueueFamily::getGraphicQueueFamilyIndex(physicalDevice);
+    vkGetDeviceQueue(*device, graphicQueueFamilyIndex, 0, &graphicsQueue);
+
+    //cria fila de apresentação
+    VkQueue presentQueue;
+    uint32_t presentQueueFamilyIndex = VkQueueFamily::getSurfaceQueueFamilyIndex(physicalDevice);
+    vkGetDeviceQueue(*device, presentQueueFamilyIndex, 0, &presentQueue);
 }
 
 void Application::setupDebugCallback()
@@ -93,6 +113,18 @@ void Application::exit()
 #if DEBUG
     VkValidationLayerConfiguration::destroyDebugUtilsMessengerEXT(vulkanInstance, nullptr);
 #endif
+
+    if (device != nullptr)
+    {
+        vkDestroyDevice(*device, nullptr);
+        device = nullptr;
+    }
+
+    if (surface != nullptr)
+    {
+        vkDestroySurfaceKHR(vulkanInstance, *surface, nullptr);
+        surface = nullptr;
+    }
 
     if (vulkanInstance != nullptr)
     {
