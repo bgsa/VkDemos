@@ -7,6 +7,8 @@
 #include "VkPhysicalDeviceManager.h"
 #include "VkLogicalDevice.h"
 #include "VkSwapChain.h"
+#include "ImageView.h"
+#include "Shader.h"
 
 namespace VkDemos
 {
@@ -21,6 +23,7 @@ private:
   VkSurfaceKHR surface = VK_NULL_HANDLE;
   VkQueueFamily *queueFamily = nullptr;
   VkSwapChain *swapChain = nullptr;
+  ImageView *imageView = nullptr;
 
   void setupWindow();
   void setupVulkan();

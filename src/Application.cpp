@@ -23,6 +23,14 @@ void Application::run()
 
     //cria swap chain
     swapChain = VkSwapChain::createSwapChain(physicalDevice, *device, surface, *queueFamily);
+
+    //cria image view
+    imageView = ImageView::createImageViews(device, swapChain);
+
+    //cria o shader
+    Shader *shader = Shader::createShader(device, "shaders/vert.spv", "shaders/frag.spv");
+
+    delete shader;
 }
 
 void Application::setupDebugCallback()
@@ -113,9 +121,15 @@ void Application::exit()
     VkValidationLayerConfiguration::destroyDebugUtilsMessengerEXT(vulkanInstance, nullptr);
 #endif
 
+    if (imageView != nullptr)
+    {
+        delete imageView;
+        imageView = nullptr;
+    }
+
     if (swapChain != nullptr)
     {
-        vkDestroySwapchainKHR(*device, swapChain->vulkanSwapChain, nullptr);
+        delete swapChain;
         swapChain = nullptr;
     }
 

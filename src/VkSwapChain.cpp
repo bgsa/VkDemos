@@ -6,6 +6,7 @@ namespace VkDemos
 VkSwapChain *VkSwapChain::createSwapChain(const VkPhysicalDevice &physicalDevice, const VkDevice &logicalDevice, const VkSurfaceKHR &surface, const VkQueueFamily &queueFamily)
 {
     VkSwapChain *swapChain = new VkSwapChain;
+    swapChain->device = logicalDevice;
 
     VkSwapChainProperties *swapChainProperties = VkSwapChainProperties::getSwapChainProperties(physicalDevice, surface);
 
@@ -47,14 +48,20 @@ VkSwapChain *VkSwapChain::createSwapChain(const VkPhysicalDevice &physicalDevice
     }
 
     VkResult result = vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain->vulkanSwapChain);
-
     if (result != VK_SUCCESS)
-    {
-        VkLogger::getOutputStream() << "failed to create swap chain: " << VkHelper::getVkResultDescription(result) << endl;
-        throw std::runtime_error("failed to create swap chain!");
-    }
+        throw std::runtime_error("failed to create swap chain: " + VkHelper::getVkResultDescription(result));
 
     delete swapChainProperties;
+
+    result = vkGetSwapchainImagesKHR(logicalDevice, swapChain->vulkanSwapChain, &imageCount, nullptr);
+    if (result != VK_SUCCESS)
+        throw std::runtime_error("failed to get images count from swap chain: " + VkHelper::getVkResultDescription(result));
+
+    swapChain->swapChainImages.resize(imageCount);
+
+    result = vkGetSwapchainImagesKHR(logicalDevice, swapChain->vulkanSwapChain, &imageCount, swapChain->swapChainImages.data());
+    if (result != VK_SUCCESS)
+        throw std::runtime_error("failed to get images from swap chain: " + VkHelper::getVkResultDescription(result));
 
     return swapChain;
 }
@@ -110,6 +117,12 @@ VkExtent2D VkSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surface
 
         return actualExtent;
     }
+}
+
+VkSwapChain::~VkSwapChain()
+{
+    if (vulkanSwapChain != VK_NULL_HANDLE)
+        vkDestroySwapchainKHR(device, vulkanSwapChain, nullptr);
 }
 
 } // namespace VkDemos
