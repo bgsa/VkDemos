@@ -299,10 +299,9 @@ void Application::run()
         throw std::runtime_error("failed to create semaphores!");
 
     //main loop
-    while (true)
+    while (isRunning)
     {
-        //glfwPollEvents();
-        //drawFrame();
+        window->update(0);
 
         uint32_t imageIndex;
         vkAcquireNextImageKHR(*device, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
@@ -366,28 +365,6 @@ void Application::run()
     delete shader;
 }
 
-void Application::setupDebugCallback()
-{
-    VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-
-    createInfo.messageSeverity =
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-
-    createInfo.messageType =
-        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-
-    createInfo.pfnUserCallback = VkLogger::vkDebugCallback;
-    createInfo.pUserData = nullptr;
-
-    if (VkValidationLayerConfiguration::createDebugUtilsMessengerEXT(vulkanInstance, &createInfo, nullptr) != VK_SUCCESS)
-        throw runtime_error("failed to set up debug callback!");
-}
-
 void Application::setupSurface()
 {
     window->createSurface(vulkanInstance, &surface);
@@ -446,6 +423,39 @@ void Application::setupWindow()
 
     window = new VkDemos::Window;
     window->setup(windowInfo);
+    window->addHandler(this);
+}
+
+void Application::setupDebugCallback()
+{
+    VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+
+    createInfo.messageSeverity =
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+
+    createInfo.messageType =
+        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+
+    createInfo.pfnUserCallback = VkLogger::vkDebugCallback;
+    createInfo.pUserData = nullptr;
+
+    if (VkValidationLayerConfiguration::createDebugUtilsMessengerEXT(vulkanInstance, &createInfo, nullptr) != VK_SUCCESS)
+        throw runtime_error("failed to set up debug callback!");
+}
+
+void Application::window_OnClose()
+{
+    isRunning = false;
+}
+
+void Application::window_OnResize(int width, int height)
+{
+    ;
 }
 
 void Application::exit()

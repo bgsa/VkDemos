@@ -9,11 +9,12 @@
 #include "VkSwapChain.h"
 #include "ImageView.h"
 #include "Shader.h"
+#include "WindowInputDevice.h"
 
 namespace VkDemos
 {
 
-class Application
+class Application : public WindowInputDeviceHandler
 {
 
 private:
@@ -25,10 +26,15 @@ private:
   VkSwapChain *swapChain = nullptr;
   ImageView *imageView = nullptr;
 
+  bool isRunning = true;
+
   void setupWindow();
   void setupVulkan();
   void setupSurface();
   void setupDebugCallback();
+
+  void window_OnClose();
+  void window_OnResize(int width, int height);
 
 public:
   void run();

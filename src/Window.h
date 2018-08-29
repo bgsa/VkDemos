@@ -3,6 +3,7 @@
 
 #include "VkDemosHeader.h"
 #include "WindowInfo.h"
+#include "WindowInputDevice.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <glfw/glfw3.h>
@@ -10,17 +11,20 @@
 namespace VkDemos
 {
 
-class Window
+class Window : public WindowInputDevice
 {
 private:
   GLFWwindow *windowHandler;
 
 public:
   void setup(VkDemos::WindowInfo &windowInfo);
-  void update();
+  void update(long long elapsedTime);
+
   vector<const char *> getRequiredExtensions();
-  void createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface);
   void printRequiredExtensions();
+
+  void createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface);
+
   ~Window();
 };
 
