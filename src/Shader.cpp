@@ -22,23 +22,40 @@ Shader *Shader::createShader(const VkDevice *device, const File *vertexShaderFil
 
     shader->device = device;
     shader->vertexShaderModule = ShaderManager::createShaderModule(device, vertexShaderFile);
-    shader->fragmentShaderModule = ShaderManager::createShaderModule(device, vertexShaderFile);
+    shader->fragmentShaderModule = ShaderManager::createShaderModule(device, fragmentShaderFile);
 
+    return shader;
+}
+
+VkPipelineShaderStageCreateInfo Shader::getVertexPipelineShaderStageInfo()
+{
     VkPipelineShaderStageCreateInfo vertexShaderStageInfo = {};
     vertexShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertexShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertexShaderStageInfo.module = *shader->vertexShaderModule;
+    vertexShaderStageInfo.module = *vertexShaderModule;
     vertexShaderStageInfo.pName = "main";
 
+    return vertexShaderStageInfo;
+}
+
+VkPipelineShaderStageCreateInfo Shader::getFragmentPipelineShaderStageInfo()
+{
     VkPipelineShaderStageCreateInfo fragmentShaderStageInfo = {};
     fragmentShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragmentShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragmentShaderStageInfo.module = *shader->fragmentShaderModule;
+    fragmentShaderStageInfo.module = *fragmentShaderModule;
     fragmentShaderStageInfo.pName = "main";
 
-    VkPipelineShaderStageCreateInfo shaderStages[] = {vertexShaderStageInfo, fragmentShaderStageInfo};
+    return fragmentShaderStageInfo;
+}
 
-    return shader;
+VkPipelineShaderStageCreateInfo *Shader::getPipelinesShaderStageInfo()
+{
+    VkPipelineShaderStageCreateInfo *shaderStages = new VkPipelineShaderStageCreateInfo[2];
+    shaderStages[0] = getVertexPipelineShaderStageInfo();
+    shaderStages[1] = getFragmentPipelineShaderStageInfo();
+
+    return shaderStages;
 }
 
 Shader::~Shader()

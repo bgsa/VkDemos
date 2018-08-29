@@ -8,14 +8,14 @@ namespace VkDemos
 {
 class ImageView
 {
-  private:
-    VkDevice *device = nullptr;
-    std::vector<VkImageView> views;
+private:
+  VkDevice *device = nullptr;
 
-  public:
-    static ImageView *createImageViews(VkDevice *device, VkSwapChain *swapChain);
+public:
+  std::vector<VkImageView> views;
+  static ImageView *createImageViews(VkDevice *device, VkSwapChain *swapChain);
 
-    ~ImageView();
+  ~ImageView();
 };
 } // namespace VkDemos
 
