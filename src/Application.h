@@ -7,9 +7,12 @@
 #include "VkPhysicalDeviceManager.h"
 #include "VkLogicalDevice.h"
 #include "VkSwapChain.h"
-#include "ImageView.h"
 #include "Shader.h"
+#include "Viewport.h"
+#include "Rasterizer.hpp"
 #include "WindowInputDevice.h"
+#include "GraphicPipeline.h"
+#include "CommandManager.h"
 
 namespace VkDemos
 {
@@ -24,13 +27,18 @@ private:
   VkSurfaceKHR surface = VK_NULL_HANDLE;
   VkQueueFamily *queueFamily = nullptr;
   VkSwapChain *swapChain = nullptr;
-  ImageView *imageView = nullptr;
+  GraphicPipeline *graphicPipeline = nullptr;
+  CommandManager *commandManager = nullptr;
+
+  VkSemaphore imageAvailableSemaphore;
+  VkSemaphore renderFinishedSemaphore;
 
   bool isRunning = true;
 
   void setupWindow();
   void setupVulkan();
   void setupSurface();
+  void setupSemaphores();
   void setupDebugCallback();
 
   void window_OnClose();

@@ -16,14 +16,22 @@ private:
   static VkPresentModeKHR chooseSwapPresentMode(const vector<VkPresentModeKHR> &presentModes);
   static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities);
 
+  void createImageViews(const VkDevice &device);
+  void createRenderPass(const VkDevice &device);
+  void createFramebuffers(const VkDevice &device);
+
 public:
   VkSurfaceFormatKHR surfaceFormat;
   VkPresentModeKHR presentMode;
   VkExtent2D extent;
   VkSwapchainKHR vulkanSwapChain = VK_NULL_HANDLE;
   std::vector<VkImage> swapChainImages;
+  std::vector<VkImageView> imageViews;
+  VkRenderPass renderPass;
+  std::vector<VkFramebuffer> framebuffers;
 
   static VkSwapChain *createSwapChain(const VkPhysicalDevice &physicalDevice, const VkDevice &logicalDevice, const VkSurfaceKHR &surface, const VkQueueFamily &queueFamily);
+
   ~VkSwapChain();
 };
 } // namespace VkDemos
