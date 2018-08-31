@@ -5,16 +5,16 @@ namespace VkDemos
 
 static CommandManager *commandManager = nullptr;
 
-void CommandManager::init(const VkPhysicalDevice &physicalDevice, const VkDevice &device, VkQueueFamily *queueFamily, VkSwapChain *swapChain, GraphicPipeline *graphicPipeline)
+void CommandManager::init(const Device *device, VkSwapChain *swapChain, GraphicPipeline *graphicPipeline)
 {
     commandManager = new CommandManager(device);
 
     VkCommandPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = queueFamily->getGraphicQueueFamilyIndex(physicalDevice);
+    poolInfo.queueFamilyIndex = QueueManager::getGraphicQueueFamilyIndex(device->physicalDevice);
     poolInfo.flags = 0; // Optional
 
-    VkResult operationResult = vkCreateCommandPool(device, &poolInfo, nullptr, &commandManager->commandPool);
+    VkResult operationResult = vkCreateCommandPool(device->logicalDevice, &poolInfo, nullptr, &commandManager->commandPool);
 
     if (operationResult != VK_SUCCESS)
         throw std::runtime_error("failed to create command pool!");
@@ -28,7 +28,7 @@ void CommandManager::init(const VkPhysicalDevice &physicalDevice, const VkDevice
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t)commandManager->commandBuffers.size();
 
-    operationResult = vkAllocateCommandBuffers(device, &allocInfo, commandManager->commandBuffers.data());
+    operationResult = vkAllocateCommandBuffers(device->logicalDevice, &allocInfo, commandManager->commandBuffers.data());
 
     if (operationResult != VK_SUCCESS)
         throw std::runtime_error("failed to allocate command buffers!");
@@ -69,9 +69,9 @@ void CommandManager::init(const VkPhysicalDevice &physicalDevice, const VkDevice
     }
 }
 
-CommandManager::CommandManager(const VkDevice &device)
+CommandManager::CommandManager(const Device *device)
 {
-    this->device = device;
+    this->device = device->logicalDevice;
 }
 
 CommandManager *CommandManager::getInstance()
@@ -85,6 +85,7 @@ CommandManager *CommandManager::getInstance()
 CommandManager::~CommandManager()
 {
     vkDestroyCommandPool(device, commandPool, nullptr);
+    commandPool = VK_NULL_HANDLE;
 }
 
 } // namespace VkDemos

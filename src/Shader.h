@@ -3,19 +3,20 @@
 
 #include "VkDemosHeader.h"
 #include "ShaderManager.h"
+#include "Device.h"
 
 namespace VkDemos
 {
 class Shader
 {
 private:
-  const VkDevice *device = nullptr;
+  VkDevice device = VK_NULL_HANDLE;
   VkShaderModule *vertexShaderModule = nullptr;
   VkShaderModule *fragmentShaderModule = nullptr;
 
 public:
-  static Shader *createShader(const VkDevice *device, const std::string &vertexShaderFilename, const std::string &fragmentShaderFilename);
-  static Shader *createShader(const VkDevice *device, const File *vertexShaderFile, const File *fragmentShaderFile);
+  static Shader *createShader(const Device *device, const std::string &vertexShaderFilename, const std::string &fragmentShaderFilename);
+  static Shader *createShader(const Device *device, const File *vertexShaderFile, const File *fragmentShaderFile);
 
   VkPipelineShaderStageCreateInfo getVertexPipelineShaderStageInfo();
   VkPipelineShaderStageCreateInfo getFragmentPipelineShaderStageInfo();

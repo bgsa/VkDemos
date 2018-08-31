@@ -2,7 +2,7 @@
 #define VK_SWAP_CHAIN_HEADER
 
 #include "VkDemosHeader.h"
-#include "VkQueueFamily.h"
+#include "Device.h"
 #include "VkSwapChainProperties.hpp"
 
 namespace VkDemos
@@ -30,7 +30,7 @@ public:
   VkRenderPass renderPass;
   std::vector<VkFramebuffer> framebuffers;
 
-  static VkSwapChain *createSwapChain(const VkPhysicalDevice &physicalDevice, const VkDevice &logicalDevice, const VkSurfaceKHR &surface, const VkQueueFamily &queueFamily);
+  static VkSwapChain *createSwapChain(const Device *device, const VkSurfaceKHR &surface);
 
   ~VkSwapChain();
 };

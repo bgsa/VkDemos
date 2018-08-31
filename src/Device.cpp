@@ -1,23 +1,28 @@
-#include "VkLogicalDevice.h"
+#include "Device.h"
 
 namespace VkDemos
 {
 
-VkDevice *VkLogicalDevice::createLogicalDevice(const VkInstance &vulkanInstance, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
+Device::Device(const VkInstance &vulkanInstance, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
 {
     VkPhysicalDeviceManager deviceManager(vulkanInstance);
 
-    VkPhysicalDevice physicalDevice = deviceManager.findSuitableGraphicalDevice(extensions);
+    physicalDevice = deviceManager.findSuitableGraphicalDevice(extensions);
 
-    VkDevice *device = createLogicalDevice(physicalDevice, surface, extensions);
-
-    return device;
+    createDevices(physicalDevice, surface, extensions);
 }
 
-VkDevice *VkLogicalDevice::createLogicalDevice(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
+Device::Device(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
 {
-    uint32_t graphicQueueIndex = VkQueueFamily::getGraphicQueueFamilyIndex(physicalDevice);
-    uint32_t presentQueueIndex = VkQueueFamily::getSurfaceQueueFamilyIndex(physicalDevice, surface);
+    createDevices(physicalDevice, surface, extensions);
+}
+
+void Device::createDevices(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
+{
+    this->physicalDevice = physicalDevice;
+
+    uint32_t graphicQueueIndex = QueueManager::getGraphicQueueFamilyIndex(physicalDevice);
+    uint32_t presentQueueIndex = QueueManager::getSurfaceQueueFamilyIndex(physicalDevice, surface);
     set<uint32_t> queueFamilies = {graphicQueueIndex, presentQueueIndex};
 
     VectorHelper::printContent(extensions);
@@ -57,12 +62,28 @@ VkDevice *VkLogicalDevice::createLogicalDevice(const VkPhysicalDevice &physicalD
     }
 #endif
 
-    VkDevice *device = new VkDevice;
-
-    if (vkCreateDevice(physicalDevice, &createInfo, nullptr, device) != VK_SUCCESS)
+    if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         throw runtime_error("failed to create logical device!");
 
-    return device;
+    createQueues(surface);
+}
+
+void Device::createQueues(const VkSurfaceKHR &surface)
+{
+    graphicsQueue = new Queue;
+    presentQueue = new Queue;
+
+    graphicsQueue->index = QueueManager::getGraphicQueueFamilyIndex(physicalDevice);
+    vkGetDeviceQueue(logicalDevice, graphicsQueue->index, 0, &graphicsQueue->queue);
+
+    presentQueue->index = QueueManager::getSurfaceQueueFamilyIndex(physicalDevice, surface);
+    vkGetDeviceQueue(logicalDevice, presentQueue->index, 0, &presentQueue->queue);
+}
+
+Device::~Device()
+{
+    vkDestroyDevice(logicalDevice, nullptr);
+    logicalDevice = VK_NULL_HANDLE;
 }
 
 } // namespace VkDemos

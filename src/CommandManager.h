@@ -2,27 +2,28 @@
 #define COMMAND_MANAGER_HEADER
 
 #include "VkDemosHeader.h"
-#include "VkQueueFamily.h"
+#include "QueueManager.h"
 #include "VkSwapChain.h"
 #include "GraphicPipeline.h"
+#include "Device.h"
 
 namespace VkDemos
 {
 class CommandManager
 {
-  private:
-    VkDevice device = VK_NULL_HANDLE;
+private:
+  VkDevice device = VK_NULL_HANDLE;
 
-    CommandManager(const VkDevice &device);
+  CommandManager(const Device *device);
 
-  public:
-    VkCommandPool commandPool = VK_NULL_HANDLE;
-    std::vector<VkCommandBuffer> commandBuffers;
+public:
+  VkCommandPool commandPool = VK_NULL_HANDLE;
+  std::vector<VkCommandBuffer> commandBuffers;
 
-    static void init(const VkPhysicalDevice &physicalDevice, const VkDevice &device, VkQueueFamily *queueFamily, VkSwapChain *swapChain, GraphicPipeline *graphicPipeline);
-    static CommandManager *getInstance();
+  static void init(const Device *device, VkSwapChain *swapChain, GraphicPipeline *graphicPipeline);
+  static CommandManager *getInstance();
 
-    ~CommandManager();
+  ~CommandManager();
 };
 } // namespace VkDemos
 

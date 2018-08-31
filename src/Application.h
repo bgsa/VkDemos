@@ -5,7 +5,7 @@
 #include "VkExtensionsConfiguration.h"
 #include "VkValidationLayerConfiguration.h"
 #include "VkPhysicalDeviceManager.h"
-#include "VkLogicalDevice.h"
+#include "Device.h"
 #include "VkSwapChain.h"
 #include "Shader.h"
 #include "Viewport.h"
@@ -23,21 +23,21 @@ class Application : public WindowInputDeviceHandler
 private:
   VkDemos::Window *window = nullptr;
   VkInstance vulkanInstance = VK_NULL_HANDLE;
-  VkDevice *device = nullptr;
+  Device *device = nullptr;
   VkSurfaceKHR surface = VK_NULL_HANDLE;
-  VkQueueFamily *queueFamily = nullptr;
   VkSwapChain *swapChain = nullptr;
   GraphicPipeline *graphicPipeline = nullptr;
   CommandManager *commandManager = nullptr;
 
-  VkSemaphore imageAvailableSemaphore;
-  VkSemaphore renderFinishedSemaphore;
+  VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
+  VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
 
   bool isRunning = true;
 
   void setupWindow();
   void setupVulkan();
   void setupSurface();
+  void setupDevice();
   void setupSemaphores();
   void setupDebugCallback();
 

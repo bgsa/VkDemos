@@ -3,7 +3,7 @@
 namespace VkDemos
 {
 
-Shader *Shader::createShader(const VkDevice *device, const std::string &vertexShaderFilename, const std::string &fragmentShaderFilename)
+Shader *Shader::createShader(const Device *device, const std::string &vertexShaderFilename, const std::string &fragmentShaderFilename)
 {
     File *vertexShaderFile = File::readFile(vertexShaderFilename);
     File *fragmentShaderFile = File::readFile(fragmentShaderFilename);
@@ -16,13 +16,13 @@ Shader *Shader::createShader(const VkDevice *device, const std::string &vertexSh
     return shader;
 }
 
-Shader *Shader::createShader(const VkDevice *device, const File *vertexShaderFile, const File *fragmentShaderFile)
+Shader *Shader::createShader(const Device *device, const File *vertexShaderFile, const File *fragmentShaderFile)
 {
     Shader *shader = new Shader;
 
-    shader->device = device;
-    shader->vertexShaderModule = ShaderManager::createShaderModule(device, vertexShaderFile);
-    shader->fragmentShaderModule = ShaderManager::createShaderModule(device, fragmentShaderFile);
+    shader->device = device->logicalDevice;
+    shader->vertexShaderModule = ShaderManager::createShaderModule(device->logicalDevice, vertexShaderFile);
+    shader->fragmentShaderModule = ShaderManager::createShaderModule(device->logicalDevice, fragmentShaderFile);
 
     return shader;
 }
@@ -62,13 +62,13 @@ Shader::~Shader()
 {
     if (vertexShaderModule != nullptr)
     {
-        vkDestroyShaderModule(*device, *vertexShaderModule, nullptr);
+        vkDestroyShaderModule(device, *vertexShaderModule, nullptr);
         vertexShaderModule = nullptr;
     }
 
     if (fragmentShaderModule != nullptr)
     {
-        vkDestroyShaderModule(*device, *fragmentShaderModule, nullptr);
+        vkDestroyShaderModule(device, *fragmentShaderModule, nullptr);
         fragmentShaderModule = nullptr;
     }
 }

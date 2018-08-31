@@ -3,7 +3,7 @@
 namespace VkDemos
 {
 
-VkShaderModule *ShaderManager::createShaderModule(const VkDevice *device, const File *shaderFile)
+VkShaderModule *ShaderManager::createShaderModule(const VkDevice &device, const File *shaderFile)
 {
     VkShaderModule *shaderModule = new VkShaderModule;
 
@@ -12,7 +12,7 @@ VkShaderModule *ShaderManager::createShaderModule(const VkDevice *device, const 
     createInfo.codeSize = shaderFile->length;
     createInfo.pCode = reinterpret_cast<const uint32_t *>(shaderFile->content);
 
-    VkResult operationResult = vkCreateShaderModule(*device, &createInfo, nullptr, shaderModule);
+    VkResult operationResult = vkCreateShaderModule(device, &createInfo, nullptr, shaderModule);
 
     if (operationResult != VK_SUCCESS)
         throw std::runtime_error("failed to create shader module: " + VkHelper::getVkResultDescription(operationResult));

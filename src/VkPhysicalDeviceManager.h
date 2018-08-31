@@ -2,7 +2,7 @@
 #define VK_PHYSICAL_DEVICE_MANAGER_HEADER
 
 #include "VkDemosHeader.h"
-#include "VkQueueFamily.h"
+#include "QueueManager.h"
 
 namespace VkDemos
 {

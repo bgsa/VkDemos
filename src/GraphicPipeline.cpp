@@ -3,9 +3,9 @@
 namespace VkDemos
 {
 
-GraphicPipeline::GraphicPipeline(const VkDevice &device, Shader *shader, VkSwapChain *swapChain, Viewport *viewport)
+GraphicPipeline::GraphicPipeline(const Device *device, Shader *shader, VkSwapChain *swapChain, Viewport *viewport)
 {
-    this->device = device;
+    this->device = device->logicalDevice;
 
     //create pipeline layout and definitions about FixedFunctions
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
@@ -51,7 +51,7 @@ GraphicPipeline::GraphicPipeline(const VkDevice &device, Shader *shader, VkSwapC
     pipelineLayoutInfo.pushConstantRangeCount = 0;    // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-    VkResult operationResult = vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout);
+    VkResult operationResult = vkCreatePipelineLayout(device->logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout);
 
     if (operationResult != VK_SUCCESS)
         throw std::runtime_error("failed to create pipeline layout: " + VkHelper::getVkResultDescription(operationResult));
@@ -75,7 +75,7 @@ GraphicPipeline::GraphicPipeline(const VkDevice &device, Shader *shader, VkSwapC
     pipelineInfo.basePipelineIndex = -1;              // Optional
     pipelineInfo.pViewportState = viewport->getViewportState();
 
-    operationResult = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicPipeline);
+    operationResult = vkCreateGraphicsPipelines(device->logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicPipeline);
 
     if (operationResult != VK_SUCCESS)
         throw std::runtime_error("failed to create graphics pipeline!");

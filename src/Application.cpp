@@ -1,7 +1,5 @@
 #include "Application.h"
 
-#include "VkQueueFamily.h"
-
 namespace VkDemos
 {
 
@@ -10,25 +8,17 @@ void Application::run()
     setupWindow();
     setupVulkan();
     setupSurface();
+    setupDevice();
 
-    VkPhysicalDeviceManager deviceManager(vulkanInstance);
-    vector<const char *> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
-
-    VkPhysicalDevice physicalDevice = deviceManager.findSuitableGraphicalDevice();
-
-    device = VkLogicalDevice::createLogicalDevice(physicalDevice, surface, requiredExtensions);
-
-    queueFamily = VkQueueFamily::createQueueFamily(physicalDevice, *device, surface);
-
-    swapChain = VkSwapChain::createSwapChain(physicalDevice, *device, surface, *queueFamily);
+    swapChain = VkSwapChain::createSwapChain(device, surface);
 
     Shader *shader = Shader::createShader(device, "shaders/vert.spv", "shaders/frag.spv");
 
     Viewport *viewport = new Viewport(800, 600);
 
-    graphicPipeline = new GraphicPipeline(*device, shader, swapChain, viewport);
+    graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport);
 
-    CommandManager::init(physicalDevice, *device, queueFamily, swapChain, graphicPipeline);
+    CommandManager::init(device, swapChain, graphicPipeline);
     commandManager = CommandManager::getInstance();
 
     setupSemaphores();
@@ -45,7 +35,7 @@ void Application::run()
         window->update(0);
 
         uint32_t imageIndex;
-        vkAcquireNextImageKHR(*device, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+        vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -57,7 +47,7 @@ void Application::run()
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandManager->commandBuffers[imageIndex];
 
-        VkResult operationResult = vkQueueSubmit(queueFamily->graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        VkResult operationResult = vkQueueSubmit(device->graphicsQueue->queue, 1, &submitInfo, VK_NULL_HANDLE);
 
         if (operationResult != VK_SUCCESS)
             throw std::runtime_error("failed to submit draw command buffer: " + VkHelper::getVkResultDescription(operationResult));
@@ -71,18 +61,24 @@ void Application::run()
         presentInfo.pImageIndices = &imageIndex;
         presentInfo.pResults = nullptr; // Optional
 
-        operationResult = vkQueuePresentKHR(queueFamily->presentQueue, &presentInfo);
+        operationResult = vkQueuePresentKHR(device->presentQueue->queue, &presentInfo);
 
         if (operationResult != VK_SUCCESS)
             throw std::runtime_error("failed to present command buffer: " + VkHelper::getVkResultDescription(operationResult));
     }
 
-    vkDeviceWaitIdle(*device);
+    vkDeviceWaitIdle(device->logicalDevice);
 
-    vkDestroySemaphore(*device, renderFinishedSemaphore, nullptr);
-    vkDestroySemaphore(*device, imageAvailableSemaphore, nullptr);
+    vkDestroySemaphore(device->logicalDevice, renderFinishedSemaphore, nullptr);
+    vkDestroySemaphore(device->logicalDevice, imageAvailableSemaphore, nullptr);
 
     delete shader;
+}
+
+void Application::setupDevice()
+{
+    vector<const char *> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+    device = new Device(vulkanInstance, surface, requiredExtensions);
 }
 
 void Application::setupSurface()
@@ -95,11 +91,11 @@ void Application::setupSemaphores()
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    VkResult operationResult = vkCreateSemaphore(*device, &semaphoreInfo, nullptr, &imageAvailableSemaphore);
+    VkResult operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore);
     if (operationResult != VK_SUCCESS)
         throw std::runtime_error("failed to create imageAvailableSemaphores!");
 
-    operationResult = vkCreateSemaphore(*device, &semaphoreInfo, nullptr, &renderFinishedSemaphore);
+    operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore);
     if (operationResult != VK_SUCCESS)
         throw std::runtime_error("failed to create renderFinishedSemaphore!");
 }
@@ -216,15 +212,9 @@ void Application::exit()
         swapChain = nullptr;
     }
 
-    if (queueFamily != nullptr)
-    {
-        delete queueFamily;
-        queueFamily = nullptr;
-    }
-
     if (device != nullptr)
     {
-        vkDestroyDevice(*device, nullptr);
+        delete device;
         device = nullptr;
     }
 

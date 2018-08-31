@@ -3,12 +3,12 @@
 namespace VkDemos
 {
 
-VkSwapChain *VkSwapChain::createSwapChain(const VkPhysicalDevice &physicalDevice, const VkDevice &logicalDevice, const VkSurfaceKHR &surface, const VkQueueFamily &queueFamily)
+VkSwapChain *VkSwapChain::createSwapChain(const Device *device, const VkSurfaceKHR &surface)
 {
     VkSwapChain *swapChain = new VkSwapChain;
-    swapChain->device = logicalDevice;
+    swapChain->device = device->logicalDevice;
 
-    VkSwapChainProperties *swapChainProperties = VkSwapChainProperties::getSwapChainProperties(physicalDevice, surface);
+    VkSwapChainProperties *swapChainProperties = VkSwapChainProperties::getSwapChainProperties(device->physicalDevice, surface);
 
     if (swapChainProperties->formats.empty() || swapChainProperties->presentModes.empty())
         throw std::runtime_error("swap chain dows not support formats or present modes!");
@@ -38,35 +38,35 @@ VkSwapChain *VkSwapChain::createSwapChain(const VkPhysicalDevice &physicalDevice
     createInfo.oldSwapchain = VK_NULL_HANDLE;
     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (queueFamily.graphicsQueueIndex != queueFamily.presentQueueIndex)
+    if (device->graphicsQueue->index != device->presentQueue->index)
     {
-        uint32_t queuesFamily[2] = {queueFamily.graphicsQueueIndex, queueFamily.presentQueueIndex};
+        uint32_t queuesFamily[2] = {device->graphicsQueue->index, device->presentQueue->index};
 
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = 2;
         createInfo.pQueueFamilyIndices = queuesFamily;
     }
 
-    VkResult result = vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain->vulkanSwapChain);
+    VkResult result = vkCreateSwapchainKHR(device->logicalDevice, &createInfo, nullptr, &swapChain->vulkanSwapChain);
     if (result != VK_SUCCESS)
         throw std::runtime_error("failed to create swap chain: " + VkHelper::getVkResultDescription(result));
 
     delete swapChainProperties;
 
-    result = vkGetSwapchainImagesKHR(logicalDevice, swapChain->vulkanSwapChain, &imageCount, nullptr);
+    result = vkGetSwapchainImagesKHR(device->logicalDevice, swapChain->vulkanSwapChain, &imageCount, nullptr);
     if (result != VK_SUCCESS)
         throw std::runtime_error("failed to get images count from swap chain: " + VkHelper::getVkResultDescription(result));
 
     swapChain->swapChainImages.resize(imageCount);
 
-    result = vkGetSwapchainImagesKHR(logicalDevice, swapChain->vulkanSwapChain, &imageCount, swapChain->swapChainImages.data());
+    result = vkGetSwapchainImagesKHR(device->logicalDevice, swapChain->vulkanSwapChain, &imageCount, swapChain->swapChainImages.data());
 
     if (result != VK_SUCCESS)
         throw std::runtime_error("failed to get images from swap chain: " + VkHelper::getVkResultDescription(result));
 
-    swapChain->createImageViews(logicalDevice);
-    swapChain->createRenderPass(logicalDevice);
-    swapChain->createFramebuffers(logicalDevice);
+    swapChain->createImageViews(device->logicalDevice);
+    swapChain->createRenderPass(device->logicalDevice);
+    swapChain->createFramebuffers(device->logicalDevice);
 
     return swapChain;
 }

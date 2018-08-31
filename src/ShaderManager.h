@@ -8,8 +8,8 @@ namespace VkDemos
 {
 class ShaderManager
 {
-  public:
-    static VkShaderModule *createShaderModule(const VkDevice *device, const File *shaderFile);
+public:
+  static VkShaderModule *createShaderModule(const VkDevice &device, const File *shaderFile);
 };
 } // namespace VkDemos
 

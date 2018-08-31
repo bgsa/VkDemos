@@ -34,7 +34,7 @@ vector<VkPhysicalDevice> VkPhysicalDeviceManager::findGraphicalDevices()
     for (const VkPhysicalDevice &device : devices)
     {
         VkPhysicalDeviceFeatures deviceFeatures = getFeatures(device);
-        bool hasGraphicalSupport = VkQueueFamily::hasGraphicQueueFamily(device);
+        bool hasGraphicalSupport = QueueManager::hasGraphicQueueFamily(device);
 
         if (deviceFeatures.geometryShader && hasGraphicalSupport)
             graphicalDevices.push_back(device);
