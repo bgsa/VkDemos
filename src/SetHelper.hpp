@@ -34,6 +34,8 @@ class SetHelper
             array[i] = value.c_str();
             i++;
         }
+
+        return array;
     }
 
     template <typename T>

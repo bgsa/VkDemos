@@ -25,7 +25,7 @@
             "type": "cppdbg",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/build/PixelEffectLinuxApp",
+            "program": "${workspaceFolder}/build/VkDemo",
             "stopAtEntry": false,
             "environment": [],
             "externalConsole": true,
