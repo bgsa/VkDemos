@@ -4,6 +4,12 @@
 #ifdef WINDOWS
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
+#ifdef LINUX
+//#define VK_USE_PLATFORM_XLIB_KHR
+#endif
+#ifdef ANDROID
+#define VK_USE_PLATFORM_ANDROID_KHR
+#endif
 
 #include <limits>
 #include <iostream>

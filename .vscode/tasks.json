@@ -4,7 +4,7 @@
     "tasks": [
         {
             "label": "Clean-Linux",
-            "command": "clear",
+            "command": "clear"
         },
         {
             "label": "Delete-Build-Dir-Linux",
@@ -35,19 +35,28 @@
                 "-DLINUX",
                 "../src/*.cpp",
                 "-I./../include",
-                "-L./../lib/x86/Debug",
+                "-L/Users/Bruno/Tools/vulkansdk-1.1.82.1/macOS/lib",
+                "-lvulkan",
                 "-lglfw3",
-                "-lvulkan-1",
+                "-framework",
+                "OpenGL",
+                "-framework",
+                "Cocoa",
+                "-framework",
+                "IOKit",
+                "-framework",
+                "CoreVideo",
                 "-o",
                 "VkDemo"
             ],
             "dependsOn": [
                 "Make-Build-Dir-Linux"
-            ]
+            ],
+            "problemMatcher": []
         },
         {
             "label": "Clean-Windows",
-            "command": "cls",
+            "command": "cls"
         },
         {
             "label": "Delete-Build-Dir-Windows",
