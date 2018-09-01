@@ -1,14 +1,14 @@
-#include "VkSwapChain.h"
+#include "SwapChain.h"
 
 namespace VkDemos
 {
 
-VkSwapChain *VkSwapChain::createSwapChain(const Device *device, const VkSurfaceKHR &surface)
+SwapChain *SwapChain::createSwapChain(const Device *device, const VkSurfaceKHR &surface)
 {
-    VkSwapChain *swapChain = new VkSwapChain;
+    SwapChain *swapChain = new SwapChain;
     swapChain->device = device->logicalDevice;
 
-    VkSwapChainProperties *swapChainProperties = VkSwapChainProperties::getSwapChainProperties(device->physicalDevice, surface);
+    SwapChainProperties *swapChainProperties = SwapChainProperties::getSwapChainProperties(device->physicalDevice, surface);
 
     if (swapChainProperties->formats.empty() || swapChainProperties->presentModes.empty())
         throw std::runtime_error("swap chain dows not support formats or present modes!");
@@ -17,10 +17,11 @@ VkSwapChain *VkSwapChain::createSwapChain(const Device *device, const VkSurfaceK
     swapChain->presentMode = chooseSwapPresentMode(swapChainProperties->presentModes);
     swapChain->extent = chooseSwapExtent(swapChainProperties->capabilities);
 
-    uint32_t imageCount = swapChainProperties->capabilities.minImageCount + 1;
+    //uint32_t maxImageCount = swapChainProperties->capabilities.maxImageCount;
+    uint32_t imageCount = swapChainProperties->capabilities.minImageCount;
 
-    if (swapChainProperties->capabilities.maxImageCount > 0 && imageCount > swapChainProperties->capabilities.maxImageCount)
-        imageCount = swapChainProperties->capabilities.maxImageCount;
+    if (imageCount > 1)
+        imageCount = 2;
 
     VkSwapchainCreateInfoKHR createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -71,7 +72,7 @@ VkSwapChain *VkSwapChain::createSwapChain(const Device *device, const VkSurfaceK
     return swapChain;
 }
 
-void VkSwapChain::createImageViews(const VkDevice &device)
+void SwapChain::createImageViews(const VkDevice &device)
 {
     size_t imageCount = swapChainImages.size();
 
@@ -104,7 +105,7 @@ void VkSwapChain::createImageViews(const VkDevice &device)
     }
 }
 
-void VkSwapChain::createRenderPass(const VkDevice &device)
+void SwapChain::createRenderPass(const VkDevice &device)
 {
     //create render pass
     VkAttachmentDescription colorAttachment = {};
@@ -149,7 +150,20 @@ void VkSwapChain::createRenderPass(const VkDevice &device)
         throw std::runtime_error("failed to create render pass: " + VkHelper::getVkResultDescription(operationResult));
 }
 
-void VkSwapChain::createFramebuffers(const VkDevice &device)
+VkRenderPassBeginInfo SwapChain::getRenderPassBegin(size_t framebufferIndex)
+{
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.framebuffer = framebuffers[framebufferIndex];
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = extent;
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+
+    return renderPassInfo;
+}
+
+void SwapChain::createFramebuffers(const VkDevice &device)
 {
     framebuffers.resize(imageViews.size());
 
@@ -172,7 +186,7 @@ void VkSwapChain::createFramebuffers(const VkDevice &device)
     }
 }
 
-VkSurfaceFormatKHR VkSwapChain::chooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR> &surfaceFormats)
+VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR> &surfaceFormats)
 {
     if (surfaceFormats.size() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
     {
@@ -190,7 +204,7 @@ VkSurfaceFormatKHR VkSwapChain::chooseSwapSurfaceFormat(const vector<VkSurfaceFo
     return surfaceFormats[0];
 }
 
-VkPresentModeKHR VkSwapChain::chooseSwapPresentMode(const vector<VkPresentModeKHR> &presentModes)
+VkPresentModeKHR SwapChain::chooseSwapPresentMode(const vector<VkPresentModeKHR> &presentModes)
 {
     VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
 
@@ -208,7 +222,7 @@ VkPresentModeKHR VkSwapChain::chooseSwapPresentMode(const vector<VkPresentModeKH
 
     return bestMode;
 }
-VkExtent2D VkSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities)
+VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities)
 {
     if (surfacecapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
@@ -224,7 +238,7 @@ VkExtent2D VkSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surface
     }
 }
 
-VkSwapChain::~VkSwapChain()
+SwapChain::~SwapChain()
 {
     for (VkFramebuffer framebuffer : framebuffers)
         vkDestroyFramebuffer(device, framebuffer, nullptr);

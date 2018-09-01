@@ -3,9 +3,10 @@
 
 #include "VkDemosHeader.h"
 #include "QueueManager.h"
-#include "VkSwapChain.h"
+#include "SwapChain.h"
 #include "GraphicPipeline.h"
 #include "Device.h"
+#include "Command.h"
 
 namespace VkDemos
 {
@@ -18,9 +19,10 @@ private:
 
 public:
   VkCommandPool commandPool = VK_NULL_HANDLE;
-  std::vector<VkCommandBuffer> commandBuffers;
 
-  static void init(const Device *device, VkSwapChain *swapChain, GraphicPipeline *graphicPipeline);
+  static void init(const Device *device, SwapChain *swapChain, GraphicPipeline *graphicPipeline);
+  Command *createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain);
+
   static CommandManager *getInstance();
 
   ~CommandManager();

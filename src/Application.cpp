@@ -10,16 +10,24 @@ void Application::run()
     setupSurface();
     setupDevice();
 
-    swapChain = VkSwapChain::createSwapChain(device, surface);
+    swapChain = SwapChain::createSwapChain(device, surface);
 
     Shader *shader = Shader::createShader(device, "shaders/vert.spv", "shaders/frag.spv");
 
-    Viewport *viewport = new Viewport(800, 600);
+    Viewport *viewport = new Viewport(800, 600); // SETAR VIEWPORT no window setup ?!
 
     graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport);
 
     CommandManager::init(device, swapChain, graphicPipeline);
     commandManager = CommandManager::getInstance();
+
+    Command *command = commandManager->createCommand(graphicPipeline, swapChain);
+    command->begin();
+
+    for (VkCommandBuffer commandBuffer : command->commandBuffers)
+        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+    command->end();
 
     setupSemaphores();
 
@@ -34,8 +42,8 @@ void Application::run()
     {
         window->update(0);
 
-        uint32_t imageIndex;
-        vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+        uint32_t currentBufferIndex;
+        vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &currentBufferIndex);
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -45,7 +53,7 @@ void Application::run()
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandManager->commandBuffers[imageIndex];
+        submitInfo.pCommandBuffers = &command->commandBuffers[currentBufferIndex];
 
         VkResult operationResult = vkQueueSubmit(device->graphicsQueue->queue, 1, &submitInfo, VK_NULL_HANDLE);
 
@@ -58,7 +66,7 @@ void Application::run()
         presentInfo.pWaitSemaphores = signalSemaphores;
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
-        presentInfo.pImageIndices = &imageIndex;
+        presentInfo.pImageIndices = &currentBufferIndex;
         presentInfo.pResults = nullptr; // Optional
 
         operationResult = vkQueuePresentKHR(device->presentQueue->queue, &presentInfo);
@@ -68,6 +76,8 @@ void Application::run()
     }
 
     vkDeviceWaitIdle(device->logicalDevice);
+
+    delete command;
 
     vkDestroySemaphore(device->logicalDevice, renderFinishedSemaphore, nullptr);
     vkDestroySemaphore(device->logicalDevice, imageAvailableSemaphore, nullptr);

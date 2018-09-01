@@ -3,7 +3,7 @@
 namespace VkDemos
 {
 
-GraphicPipeline::GraphicPipeline(const Device *device, Shader *shader, VkSwapChain *swapChain, Viewport *viewport)
+GraphicPipeline::GraphicPipeline(const Device *device, Shader *shader, SwapChain *swapChain, Viewport *viewport)
 {
     this->device = device->logicalDevice;
 
@@ -74,6 +74,7 @@ GraphicPipeline::GraphicPipeline(const Device *device, Shader *shader, VkSwapCha
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
     pipelineInfo.basePipelineIndex = -1;              // Optional
     pipelineInfo.pViewportState = viewport->getViewportState();
+    pipelineInfo.pTessellationState = nullptr;
 
     operationResult = vkCreateGraphicsPipelines(device->logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicPipeline);
 

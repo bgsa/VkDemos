@@ -1,20 +1,20 @@
-#ifndef VK_SWAP_CHAIN_PROPERTIES_HEADER
-#define VK_SWAP_CHAIN_PROPERTIES_HEADER
+#ifndef SWAP_CHAIN_PROPERTIES_HEADER
+#define SWAP_CHAIN_PROPERTIES_HEADER
 
 #include "VkDemosHeader.h"
 
 namespace VkDemos
 {
-class VkSwapChainProperties
+class SwapChainProperties
 {
   public:
     VkSurfaceCapabilitiesKHR capabilities;
     vector<VkSurfaceFormatKHR> formats;
     vector<VkPresentModeKHR> presentModes;
 
-    static VkSwapChainProperties *getSwapChainProperties(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface)
+    static SwapChainProperties *getSwapChainProperties(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface)
     {
-        VkSwapChainProperties *swapChainProperties = new VkSwapChainProperties;
+        SwapChainProperties *swapChainProperties = new SwapChainProperties;
 
         VkResult operationResult = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &swapChainProperties->capabilities);
         if (operationResult != VK_SUCCESS)

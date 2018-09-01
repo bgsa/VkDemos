@@ -25,8 +25,6 @@ void Device::createDevices(const VkPhysicalDevice &physicalDevice, const VkSurfa
     uint32_t presentQueueIndex = QueueManager::getSurfaceQueueFamilyIndex(physicalDevice, surface);
     set<uint32_t> queueFamilies = {graphicQueueIndex, presentQueueIndex};
 
-    VectorHelper::printContent(extensions);
-
     float queuePriority = 1.0f;
 
     vector<VkDeviceQueueCreateInfo> queueInfos;

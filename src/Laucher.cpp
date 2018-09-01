@@ -1,5 +1,4 @@
 
-#include <iostream>
 #include "Application.h"
 
 using namespace std;
@@ -15,11 +14,13 @@ int main(int argc, char const *argv[])
     catch (const exception &e)
     {
         VkDemos::VkLogger::error(e);
+
         delete application;
-        return -1;
+
+        return EXIT_FAILURE;
     }
 
     delete application;
 
-    return 0;
+    return EXIT_SUCCESS;
 }

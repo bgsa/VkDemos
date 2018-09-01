@@ -1,12 +1,13 @@
 #ifndef APPLICATION_HEADER
 #define APPLICATION_HEADER
 
+#include "VkDemosHeader.h"
 #include "Window.h"
 #include "VkExtensionsConfiguration.h"
 #include "VkValidationLayerConfiguration.h"
 #include "VkPhysicalDeviceManager.h"
 #include "Device.h"
-#include "VkSwapChain.h"
+#include "SwapChain.h"
 #include "Shader.h"
 #include "Viewport.h"
 #include "Rasterizer.hpp"
@@ -25,7 +26,7 @@ private:
   VkInstance vulkanInstance = VK_NULL_HANDLE;
   Device *device = nullptr;
   VkSurfaceKHR surface = VK_NULL_HANDLE;
-  VkSwapChain *swapChain = nullptr;
+  SwapChain *swapChain = nullptr;
   GraphicPipeline *graphicPipeline = nullptr;
   CommandManager *commandManager = nullptr;
 

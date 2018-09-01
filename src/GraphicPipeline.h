@@ -3,7 +3,7 @@
 
 #include "VkDemosHeader.h"
 #include "Rasterizer.hpp"
-#include "VkSwapChain.h"
+#include "SwapChain.h"
 #include "Shader.h"
 #include "Viewport.h"
 #include "Device.h"
@@ -19,7 +19,7 @@ private:
 public:
   VkPipeline graphicPipeline;
 
-  GraphicPipeline(const Device *device, Shader *shader, VkSwapChain *swapChain, Viewport *viewport);
+  GraphicPipeline(const Device *device, Shader *shader, SwapChain *swapChain, Viewport *viewport);
   ~GraphicPipeline();
 };
 } // namespace VkDemos

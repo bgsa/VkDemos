@@ -1,16 +1,18 @@
-#ifndef VK_SWAP_CHAIN_HEADER
-#define VK_SWAP_CHAIN_HEADER
+#ifndef SWAP_CHAIN_HEADER
+#define SWAP_CHAIN_HEADER
 
 #include "VkDemosHeader.h"
 #include "Device.h"
-#include "VkSwapChainProperties.hpp"
+#include "SwapChainProperties.hpp"
 
 namespace VkDemos
 {
-class VkSwapChain
+class SwapChain
 {
 private:
   VkDevice device;
+  VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+  VkRenderPassBeginInfo renderPassInfo = {};
 
   static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR> &surfaceFormats);
   static VkPresentModeKHR chooseSwapPresentMode(const vector<VkPresentModeKHR> &presentModes);
@@ -21,18 +23,19 @@ private:
   void createFramebuffers(const VkDevice &device);
 
 public:
+  VkSwapchainKHR vulkanSwapChain = VK_NULL_HANDLE;
   VkSurfaceFormatKHR surfaceFormat;
   VkPresentModeKHR presentMode;
   VkExtent2D extent;
-  VkSwapchainKHR vulkanSwapChain = VK_NULL_HANDLE;
   std::vector<VkImage> swapChainImages;
   std::vector<VkImageView> imageViews;
   VkRenderPass renderPass;
   std::vector<VkFramebuffer> framebuffers;
 
-  static VkSwapChain *createSwapChain(const Device *device, const VkSurfaceKHR &surface);
+  static SwapChain *createSwapChain(const Device *device, const VkSurfaceKHR &surface);
+  VkRenderPassBeginInfo getRenderPassBegin(size_t framebufferIndex);
 
-  ~VkSwapChain();
+  ~SwapChain();
 };
 } // namespace VkDemos
 
