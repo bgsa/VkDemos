@@ -2,7 +2,13 @@
 #define VK_DEMOS_HEADER_H
 
 #ifdef WINDOWS
-#define VK_USE_PLATFORM_WIN32_KHR
+	#define VK_USE_PLATFORM_WIN32_KHR
+
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif 
+
+	#include <Windows.h>
 #endif
 
 #include <limits>

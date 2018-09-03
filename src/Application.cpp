@@ -3,18 +3,23 @@
 namespace VkDemos
 {
 
+const int MAX_FRAMEBUFFER = 2;
+
 void Application::run()
 {
     setupWindow();
     setupVulkan();
     setupSurface();
     setupDevice();
+    setupSyncObjects();
 
-    swapChain = SwapChain::createSwapChain(device, surface);
+    swapChain = SwapChain::createSwapChain(device, surface, window);
 
-    Shader *shader = Shader::createShader(device, "shaders/vert.spv", "shaders/frag.spv");
+    Shader *shader = Shader::createShader(device, File::getAbsolutePath("resources\\shaders\\vert.spv"), File::getAbsolutePath( "resources\\shaders\\frag.spv"));
+	//Shader *shader = Shader::createShader(device, "./resources/shaders/vert.spv", "./resources/shaders/frag.spv");
 
-    Viewport *viewport = new Viewport(800, 600); // SETAR VIEWPORT no window setup ?!
+    Size windowSize = window->getSize();
+    Viewport *viewport = new Viewport(windowSize.width, windowSize.height); // SETAR VIEWPORT no window setup ?!
 
     graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport);
 
@@ -29,21 +34,22 @@ void Application::run()
 
     command->end();
 
-    setupSemaphores();
+    size_t currentFrame = 0;
 
-    //setup for render looping
-    VkSwapchainKHR swapChains[] = {swapChain->vulkanSwapChain};
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-
-    //main loop
     while (isRunning)
     {
         window->update(0);
 
-        uint32_t currentBufferIndex;
-        vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &currentBufferIndex);
+        vkWaitForFences(device->logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+        vkResetFences(device->logicalDevice, 1, &inFlightFences[currentFrame]);
+
+        VkSwapchainKHR swapChains[] = {swapChain->vulkanSwapChain};
+        VkSemaphore waitSemaphores[] = {imageAvailableSemaphore[currentFrame]};
+        VkSemaphore signalSemaphores[] = {renderFinishedSemaphore[currentFrame]};
+        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+        uint32_t imageIndex;
+        vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -53,9 +59,9 @@ void Application::run()
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &command->commandBuffers[currentBufferIndex];
+        submitInfo.pCommandBuffers = &command->commandBuffers[imageIndex];
 
-        VkResult operationResult = vkQueueSubmit(device->graphicsQueue->queue, 1, &submitInfo, VK_NULL_HANDLE);
+        VkResult operationResult = vkQueueSubmit(device->graphicsQueue->queue, 1, &submitInfo, inFlightFences[currentFrame]);
 
         if (operationResult != VK_SUCCESS)
             throw std::runtime_error("failed to submit draw command buffer: " + VkHelper::getVkResultDescription(operationResult));
@@ -66,22 +72,22 @@ void Application::run()
         presentInfo.pWaitSemaphores = signalSemaphores;
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
-        presentInfo.pImageIndices = &currentBufferIndex;
+        presentInfo.pImageIndices = &imageIndex;
         presentInfo.pResults = nullptr; // Optional
 
         operationResult = vkQueuePresentKHR(device->presentQueue->queue, &presentInfo);
 
         if (operationResult != VK_SUCCESS)
             throw std::runtime_error("failed to present command buffer: " + VkHelper::getVkResultDescription(operationResult));
+
+        currentFrame = (currentFrame + 1) % MAX_FRAMEBUFFER;
+
+        vkQueueWaitIdle(device->presentQueue->queue);
     }
 
     vkDeviceWaitIdle(device->logicalDevice);
 
     delete command;
-
-    vkDestroySemaphore(device->logicalDevice, renderFinishedSemaphore, nullptr);
-    vkDestroySemaphore(device->logicalDevice, imageAvailableSemaphore, nullptr);
-
     delete shader;
 }
 
@@ -96,18 +102,35 @@ void Application::setupSurface()
     window->createSurface(vulkanInstance, &surface);
 }
 
-void Application::setupSemaphores()
+void Application::setupSyncObjects()
 {
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    VkResult operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore);
-    if (operationResult != VK_SUCCESS)
-        throw std::runtime_error("failed to create imageAvailableSemaphores!");
+    VkFenceCreateInfo fenceInfo = {};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore);
-    if (operationResult != VK_SUCCESS)
-        throw std::runtime_error("failed to create renderFinishedSemaphore!");
+    imageAvailableSemaphore.resize(MAX_FRAMEBUFFER);
+    renderFinishedSemaphore.resize(MAX_FRAMEBUFFER);
+    inFlightFences.resize(MAX_FRAMEBUFFER);
+
+    VkResult operationResult;
+
+    for (size_t i = 0; i != MAX_FRAMEBUFFER; i++)
+    {
+        operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore[i]);
+        if (operationResult != VK_SUCCESS)
+            throw std::runtime_error("failed to create imageAvailableSemaphores!");
+
+        operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore[i]);
+        if (operationResult != VK_SUCCESS)
+            throw std::runtime_error("failed to create renderFinishedSemaphore!");
+
+        operationResult = vkCreateFence(device->logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]);
+        if (operationResult != VK_SUCCESS)
+            throw std::runtime_error("failed to create fence in flight!");
+    }
 }
 
 void Application::setupVulkan()
@@ -160,6 +183,7 @@ void Application::setupVulkan()
 void Application::setupWindow()
 {
     VkDemos::WindowInfo windowInfo("VkDemo", 800, 600);
+    windowInfo.setResizable(true);
 
     window = new VkDemos::Window;
     window->setup(windowInfo);
@@ -209,6 +233,15 @@ void Application::exit()
         delete commandManager;
         commandManager = nullptr;
     }
+
+    for (VkSemaphore semaphore : renderFinishedSemaphore)
+        vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
+
+    for (VkSemaphore semaphore : imageAvailableSemaphore)
+        vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
+
+    for (VkFence fence : inFlightFences)
+        vkDestroyFence(device->logicalDevice, fence, nullptr);
 
     if (graphicPipeline != nullptr)
     {

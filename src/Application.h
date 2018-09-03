@@ -30,8 +30,9 @@ private:
   GraphicPipeline *graphicPipeline = nullptr;
   CommandManager *commandManager = nullptr;
 
-  VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
-  VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
+  std::vector<VkSemaphore> imageAvailableSemaphore;
+  std::vector<VkSemaphore> renderFinishedSemaphore;
+  std::vector<VkFence> inFlightFences;
 
   bool isRunning = true;
 
@@ -39,7 +40,7 @@ private:
   void setupVulkan();
   void setupSurface();
   void setupDevice();
-  void setupSemaphores();
+  void setupSyncObjects();
   void setupDebugCallback();
 
   void window_OnClose();

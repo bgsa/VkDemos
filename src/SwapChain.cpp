@@ -3,7 +3,7 @@
 namespace VkDemos
 {
 
-SwapChain *SwapChain::createSwapChain(const Device *device, const VkSurfaceKHR &surface)
+SwapChain *SwapChain::createSwapChain(const Device *device, const VkSurfaceKHR &surface, Window *window)
 {
     SwapChain *swapChain = new SwapChain;
     swapChain->device = device->logicalDevice;
@@ -15,7 +15,7 @@ SwapChain *SwapChain::createSwapChain(const Device *device, const VkSurfaceKHR &
 
     swapChain->surfaceFormat = chooseSwapSurfaceFormat(swapChainProperties->formats);
     swapChain->presentMode = chooseSwapPresentMode(swapChainProperties->presentModes);
-    swapChain->extent = chooseSwapExtent(swapChainProperties->capabilities);
+    swapChain->extent = chooseSwapExtent(swapChainProperties->capabilities, window);
 
     //uint32_t maxImageCount = swapChainProperties->capabilities.maxImageCount;
     uint32_t imageCount = swapChainProperties->capabilities.minImageCount;
@@ -222,7 +222,7 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const vector<VkPresentModeKHR>
 
     return bestMode;
 }
-VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities)
+VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities, Window *window)
 {
     if (surfacecapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
@@ -230,7 +230,8 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfaceca
     }
     else
     {
-        VkExtent2D actualExtent = {800, 600};
+        Size windowSize = window->getSize();
+        VkExtent2D actualExtent = {(uint32_t)windowSize.width, (uint32_t)windowSize.height};
         actualExtent.width = std::max(surfacecapabilities.minImageExtent.width, std::min(surfacecapabilities.maxImageExtent.width, actualExtent.width));
         actualExtent.height = std::max(surfacecapabilities.minImageExtent.height, std::min(surfacecapabilities.maxImageExtent.height, actualExtent.height));
 

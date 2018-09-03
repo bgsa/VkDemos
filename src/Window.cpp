@@ -7,12 +7,12 @@ namespace VkDemos
 
 void Window::createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface)
 {
-    if (glfwCreateWindowSurface(vulkanInstance, windowHandler, nullptr, surface) != VK_SUCCESS)
+    VkResult operationResult = glfwCreateWindowSurface(vulkanInstance, windowHandler, nullptr, surface);
+
+    if (operationResult != VK_SUCCESS)
         throw runtime_error("failed to create window surface!");
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
 static void eventClose(GLFWwindow *windowHandler)
 {
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(windowHandler));
@@ -32,7 +32,6 @@ static void eventResize(GLFWwindow *windowHandler, int width, int height)
     for (size_t i = 0; i != window->getHandlersCount(); i++)
         handlers[i]->window_OnResize(width, height);
 }
-#pragma GCC diagnostic pop
 
 void Window::setup(VkDemos::WindowInfo &windowInfo)
 {
@@ -55,8 +54,17 @@ void Window::setup(VkDemos::WindowInfo &windowInfo)
 
     glfwSetWindowCloseCallback(windowHandler, eventClose);
     glfwSetWindowSizeCallback(windowHandler, eventResize);
+    //glfwSetFramebufferSizeCallback(windowHandler, eventResize);
 
-    glfwMakeContextCurrent(windowHandler);
+    //glfwMakeContextCurrent(windowHandler);
+}
+
+Size Window::getSize()
+{
+    int width, height;
+    glfwGetWindowSize(windowHandler, &width, &height);
+
+    return Size{width, height};
 }
 
 void Window::update(long long elapsedTime)

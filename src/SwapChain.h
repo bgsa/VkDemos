@@ -4,6 +4,7 @@
 #include "VkDemosHeader.h"
 #include "Device.h"
 #include "SwapChainProperties.hpp"
+#include "Window.h"
 
 namespace VkDemos
 {
@@ -16,7 +17,7 @@ private:
 
   static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR> &surfaceFormats);
   static VkPresentModeKHR chooseSwapPresentMode(const vector<VkPresentModeKHR> &presentModes);
-  static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities);
+  static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities, Window *window);
 
   void createImageViews(const VkDevice &device);
   void createRenderPass(const VkDevice &device);
@@ -32,7 +33,7 @@ public:
   VkRenderPass renderPass;
   std::vector<VkFramebuffer> framebuffers;
 
-  static SwapChain *createSwapChain(const Device *device, const VkSurfaceKHR &surface);
+  static SwapChain *createSwapChain(const Device *device, const VkSurfaceKHR &surface, Window *window);
   VkRenderPassBeginInfo getRenderPassBegin(size_t framebufferIndex);
 
   ~SwapChain();

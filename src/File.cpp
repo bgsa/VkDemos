@@ -3,6 +3,30 @@
 namespace VkDemos
 {
 
+	inline char getFileSeparator() 
+	{
+		return FILE_SEPARATOR;
+	}
+
+	std::string File::getCurrentDir()
+	{
+		char currentDir[MAX_DIRECTORY_NAME];
+
+#if WINDOWS
+		GetCurrentDirectoryA(MAX_DIRECTORY_NAME, currentDir);
+#endif
+#if LINUX
+		GetCurrentDir(currentDir, sizeof(currentDir));
+#endif
+
+		return std::string(currentDir) + FILE_SEPARATOR;
+	}
+
+	string File::getAbsolutePath(string relativePath) 
+	{
+		return string(File::getCurrentDir()) + relativePath;
+	}
+
 File *File::readFile(const std::string &filename)
 {
     File *newFile = new File;
