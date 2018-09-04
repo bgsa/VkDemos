@@ -4,14 +4,12 @@
 #include <vector>
 #include <cstring>
 
-using namespace std;
-
-namespace VkDemos
+namespace VkBootstrap
 {
 class VectorHelper
 {
   public:
-    static char **convertToCharArray(const vector<string> &vector)
+    static char **convertToCharArray(const std::vector<std::string> &vector)
     {
         char **array = new char *[vector.size()];
 
@@ -21,29 +19,29 @@ class VectorHelper
         return array;
     }
 
-    static set<string> convertToSetString(const vector<const char *> &vector)
+    static std::set<std::string> convertToSetString(const std::vector<const char *> &vector)
     {
-        set<string> result;
+		std::set<std::string> result;
 
         for (size_t i = 0; i != vector.size(); i++)
-            result.insert(string(vector[i]));
+            result.insert(std::string(vector[i]));
 
         return result;
     }
 
-    static void convertToCharArrayVector(const std::vector<string> &vector, std::vector<const char *> &newVector)
+    static void convertToCharArrayVector(const std::vector<std::string> &vector, std::vector<const char *> &newVector)
     {
         for (std::string value : vector)
             newVector.push_back(value.c_str());
     }
 
     template <typename T>
-    static void printContent(const vector<T> &vector)
+    static void printContent(const std::vector<T> &vector)
     {
         for (T value : vector)
-            VkLogger::getOutputStream() << value << endl;
+            VkLogger::getOutputStream() << value << std::endl;
     }
 };
-} // namespace VkDemos
+}
 
 #endif

@@ -1,6 +1,6 @@
 #include "File.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 	inline char getFileSeparator() 
@@ -22,9 +22,9 @@ namespace VkDemos
 		return std::string(currentDir) + FILE_SEPARATOR;
 	}
 
-	string File::getAbsolutePath(string relativePath) 
+	std::string File::getAbsolutePath(std::string relativePath)
 	{
-		return string(File::getCurrentDir()) + relativePath;
+		return std::string(File::getCurrentDir()) + relativePath;
 	}
 
 File *File::readFile(const std::string &filename)
@@ -57,4 +57,4 @@ File::~File()
     }
 }
 
-} // namespace VkDemos
+}

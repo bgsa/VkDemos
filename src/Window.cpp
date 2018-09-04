@@ -2,7 +2,7 @@
 
 #include <glfw/glfw3native.h>
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 void Window::createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface)
@@ -10,7 +10,7 @@ void Window::createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surfa
     VkResult operationResult = glfwCreateWindowSurface(vulkanInstance, windowHandler, nullptr, surface);
 
     if (operationResult != VK_SUCCESS)
-        throw runtime_error("failed to create window surface!");
+        throw std::runtime_error("failed to create window surface!");
 }
 
 static void eventClose(GLFWwindow *windowHandler)
@@ -33,12 +33,12 @@ static void eventResize(GLFWwindow *windowHandler, int width, int height)
         handlers[i]->window_OnResize(width, height);
 }
 
-void Window::setup(VkDemos::WindowInfo &windowInfo)
+void Window::setup(VkBootstrap::WindowInfo &windowInfo)
 {
-    glfwSetErrorCallback(VkDemos::VkLogger::error);
+    glfwSetErrorCallback(VkBootstrap::VkLogger::error);
 
     if (!glfwInit())
-        throw runtime_error("failed to init GLFW!");
+        throw std::runtime_error("failed to init GLFW!");
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, windowInfo.isResizable());
@@ -47,7 +47,7 @@ void Window::setup(VkDemos::WindowInfo &windowInfo)
     if (!windowHandler)
     {
         glfwTerminate();
-        throw runtime_error("failed to create GLFW window!");
+        throw std::runtime_error("failed to create GLFW window!");
     }
 
     glfwSetWindowUserPointer(windowHandler, this);
@@ -72,7 +72,7 @@ void Window::update(long long elapsedTime)
     glfwPollEvents();
 }
 
-vector<const char *> Window::getRequiredExtensions()
+std::vector<const char *> Window::getRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
     const char **glfwExtensions;
@@ -103,4 +103,4 @@ Window::~Window()
     glfwTerminate();
 }
 
-} // namespace VkDemos
+}

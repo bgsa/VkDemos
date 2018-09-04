@@ -1,6 +1,6 @@
 #include "Application.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 const int MAX_FRAMEBUFFER = 2;
@@ -15,8 +15,7 @@ void Application::run()
 
     swapChain = SwapChain::createSwapChain(device, surface, window);
 
-    Shader *shader = Shader::createShader(device, File::getAbsolutePath("resources\\shaders\\vert.spv"), File::getAbsolutePath( "resources\\shaders\\frag.spv"));
-	//Shader *shader = Shader::createShader(device, "./resources/shaders/vert.spv", "./resources/shaders/frag.spv");
+	Shader *shader = Shader::createShader(device, "resources/shaders/vert.spv", "resources/shaders/frag.spv");
 
     Size windowSize = window->getSize();
     Viewport *viewport = new Viewport(windowSize.width, windowSize.height); // SETAR VIEWPORT no window setup ?!
@@ -93,7 +92,7 @@ void Application::run()
 
 void Application::setupDevice()
 {
-    vector<const char *> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+	std::vector<const char *> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
     device = new Device(vulkanInstance, surface, requiredExtensions);
 }
 
@@ -140,7 +139,7 @@ void Application::setupVulkan()
 #if DEBUG
     VkExtensionsConfiguration::printSupportedExtensions();
     window->printRequiredExtensions();
-    VkValidationLayerConfiguration::printInstanceLayersSupported();
+    VkInstanceLayerConfiguration::printInstanceLayersSupported();
 
     extensionsRequired.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
@@ -161,9 +160,9 @@ void Application::setupVulkan()
     createInfo.enabledLayerCount = 0;
 
 #if DEBUG
-    const vector<const char *> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
+    const std::vector<const char *> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
 
-    if (VkValidationLayerConfiguration::isInstanceLayerSupported(validationLayers[0]))
+    if (VkInstanceLayerConfiguration::isInstanceLayerSupported(validationLayers[0]))
     {
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -173,7 +172,7 @@ void Application::setupVulkan()
     VkResult operationResult = vkCreateInstance(&createInfo, nullptr, &vulkanInstance);
 
     if (operationResult != VK_SUCCESS)
-        throw runtime_error("failed to create vulkan instance!");
+        throw std::runtime_error("failed to create vulkan instance!");
 
 #if DEBUG
     setupDebugCallback();
@@ -182,10 +181,10 @@ void Application::setupVulkan()
 
 void Application::setupWindow()
 {
-    VkDemos::WindowInfo windowInfo("VkDemo", 800, 600);
+    VkBootstrap::WindowInfo windowInfo("VkDemo", 800, 600);
     windowInfo.setResizable(true);
 
-    window = new VkDemos::Window;
+    window = new VkBootstrap::Window;
     window->setup(windowInfo);
     window->addHandler(this);
 }
@@ -208,8 +207,8 @@ void Application::setupDebugCallback()
     createInfo.pfnUserCallback = VkLogger::vkDebugCallback;
     createInfo.pUserData = nullptr;
 
-    if (VkValidationLayerConfiguration::createDebugUtilsMessengerEXT(vulkanInstance, &createInfo, nullptr) != VK_SUCCESS)
-        throw runtime_error("failed to set up debug callback!");
+    if (VkInstanceLayerConfiguration::createDebugUtilsMessengerEXT(vulkanInstance, &createInfo, nullptr) != VK_SUCCESS)
+        throw std::runtime_error("failed to set up debug callback!");
 }
 
 void Application::window_OnClose()
@@ -225,7 +224,7 @@ void Application::window_OnResize(int width, int height)
 void Application::exit()
 {
 #if DEBUG
-    VkValidationLayerConfiguration::destroyDebugUtilsMessengerEXT(vulkanInstance, nullptr);
+	VkInstanceLayerConfiguration::destroyDebugUtilsMessengerEXT(vulkanInstance, nullptr);
 #endif
 
     if (commandManager != nullptr)
@@ -284,4 +283,4 @@ Application::~Application()
     exit();
 }
 
-} // namespace VkDemos
+}

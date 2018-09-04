@@ -1,16 +1,16 @@
 #ifndef SWAP_CHAIN_PROPERTIES_HEADER
 #define SWAP_CHAIN_PROPERTIES_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class SwapChainProperties
 {
   public:
     VkSurfaceCapabilitiesKHR capabilities;
-    vector<VkSurfaceFormatKHR> formats;
-    vector<VkPresentModeKHR> presentModes;
+	std::vector<VkSurfaceFormatKHR> formats;
+	std::vector<VkPresentModeKHR> presentModes;
 
     static SwapChainProperties *getSwapChainProperties(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface)
     {
@@ -55,6 +55,6 @@ class SwapChainProperties
         return swapChainProperties;
     }
 };
-} // namespace VkDemos
+}
 
 #endif

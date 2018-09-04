@@ -1,23 +1,23 @@
 #ifndef WINDOW_INFO_HEADER
 #define WINDOW_INFO_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class WindowInfo
 {
 private:
-  string windowName;
+	std::string windowName;
   int width;
   int height;
   bool resizable = false;
 
 public:
-  WindowInfo(string windowName, int width, int height);
+  WindowInfo(std::string windowName, int width, int height);
 
-  string getWindowName();
-  void setWindowName(string windowName);
+  std::string getWindowName();
+  void setWindowName(std::string windowName);
 
   int getWidth();
   void setWidth(int width);
@@ -28,6 +28,6 @@ public:
   bool isResizable();
   void setResizable(bool isResizable);
 };
-} // namespace VkDemos
+}
 
 #endif

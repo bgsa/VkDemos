@@ -1,7 +1,7 @@
 #ifndef SIZE_HEADER
 #define SIZE_HEADER
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class Size
 {
@@ -15,6 +15,6 @@ class Size
         this->height = height;
     }
 };
-} // namespace VkDemos
+}
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef FILE_HEADER
 #define FILE_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 #include <fstream>
 #include <stdio.h>
 
@@ -17,7 +17,7 @@
 	#define FILE_SEPARATOR '/'
 #endif
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class File
 {
@@ -35,6 +35,6 @@ class File
 
     ~File();
 };
-} // namespace VkDemos
+}
 
 #endif

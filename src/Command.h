@@ -1,11 +1,11 @@
 #ifndef COMMAND_HEADER
 #define COMMAND_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 #include "SwapChain.h"
 #include "GraphicPipeline.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 class Command
@@ -25,6 +25,6 @@ class Command
     ~Command();
 };
 
-} // namespace VkDemos
+}
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef INPUT_DEVICE_HEADER
 #define INPUT_DEVICE_HEADER
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 class InputDevice
@@ -12,6 +12,6 @@ class InputDevice
 	virtual ~InputDevice() {}
 };
 
-} // namespace VkDemos
+}
 
 #endif

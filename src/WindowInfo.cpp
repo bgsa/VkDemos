@@ -1,20 +1,20 @@
 #include "WindowInfo.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
-WindowInfo::WindowInfo(string windowName, int width, int height)
+WindowInfo::WindowInfo(std::string windowName, int width, int height)
 {
     setWindowName(windowName);
     setWidth(width);
     setHeight(height);
 }
 
-string WindowInfo::getWindowName()
+std::string WindowInfo::getWindowName()
 {
     return windowName;
 }
-void WindowInfo::setWindowName(string windowName)
+void WindowInfo::setWindowName(std::string windowName)
 {
     this->windowName = windowName;
 }
@@ -46,4 +46,4 @@ void WindowInfo::setResizable(bool isResizable)
     this->resizable = isResizable;
 }
 
-} // namespace VkDemos
+}

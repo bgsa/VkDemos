@@ -5,7 +5,7 @@
 #include <set>
 #include <cstring>
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class SetHelper
 {
@@ -16,7 +16,7 @@ class SetHelper
 
         for (std::string value : stringSet)
         {
-            cout << "VER: " << value.c_str() << endl;
+			std::cout << "VER: " << value.c_str() << std::endl;
             const char *valueAsCharArray = value.c_str();
             result.push_back(valueAsCharArray);
         }
@@ -24,12 +24,12 @@ class SetHelper
         return result;
     }
 
-    static const char **convertToCharArray(const set<string> &values)
+    static const char **convertToCharArray(const std::set<std::string> &values)
     {
         const char **array = new const char *[values.size()];
         size_t i = 0;
 
-        for (string value : values)
+        for (std::string value : values)
         {
             array[i] = value.c_str();
             i++;
@@ -37,12 +37,12 @@ class SetHelper
     }
 
     template <typename T>
-    static void printContent(const set<T> &values)
+    static void printContent(const std::set<T> &values)
     {
         for (T value : values)
-            VkLogger::getOutputStream() << value << endl;
+            VkLogger::getOutputStream() << value << std::endl;
     }
 };
-} // namespace VkDemos
+}
 
 #endif

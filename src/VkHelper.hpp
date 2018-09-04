@@ -4,7 +4,7 @@
 #include <cstring>
 #include <vulkan/vulkan.h>
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class VkHelper
 {
@@ -82,6 +82,6 @@ class VkHelper
     }
 };
 
-} // namespace VkDemos
+}
 
 #endif

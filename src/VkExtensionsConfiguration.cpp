@@ -1,6 +1,6 @@
 #include "VkExtensionsConfiguration.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 uint32_t VkExtensionsConfiguration::getSupportedExtensionsCount()
@@ -11,23 +11,23 @@ uint32_t VkExtensionsConfiguration::getSupportedExtensionsCount()
   return extensionCount;
 }
 
-vector<VkExtensionProperties> VkExtensionsConfiguration::getSupportedExtensions()
+std::vector<VkExtensionProperties> VkExtensionsConfiguration::getSupportedExtensions()
 {
   uint32_t extensionCount = getSupportedExtensionsCount();
 
-  vector<VkExtensionProperties> extensions(extensionCount);
+  std::vector<VkExtensionProperties> extensions(extensionCount);
 
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
   return extensions;
 }
 
-bool VkExtensionsConfiguration::isExtensionSupported(string extensionName)
+bool VkExtensionsConfiguration::isExtensionSupported(std::string extensionName)
 {
   auto extensions = VkExtensionsConfiguration::getSupportedExtensions();
 
   for (const auto &extension : extensions)
-    if (string(extension.extensionName) == extensionName)
+    if (std::string(extension.extensionName) == extensionName)
       return true;
 
   return false;
@@ -35,12 +35,12 @@ bool VkExtensionsConfiguration::isExtensionSupported(string extensionName)
 
 void VkExtensionsConfiguration::printSupportedExtensions()
 {
-  auto extensions = VkExtensionsConfiguration::getSupportedExtensions();
+  std::vector<VkExtensionProperties> extensions = VkExtensionsConfiguration::getSupportedExtensions();
 
-  VkLogger::getOutputStream() << extensions.size() << " extensions available:" << endl;
+  VkLogger::getOutputStream() << extensions.size() << " extensions available:" << std::endl;
 
-  for (const auto &prop : extensions)
-    VkLogger::getOutputStream() << prop.extensionName << " - (Specification Version " << prop.specVersion << ")" << endl;
+  for (const VkExtensionProperties &prop : extensions)
+    VkLogger::getOutputStream() << prop.extensionName << " - (Revision " << prop.specVersion << ")" << std::endl;
 }
 
-} // namespace VkDemos
+}

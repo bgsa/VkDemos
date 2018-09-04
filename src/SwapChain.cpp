@@ -1,6 +1,6 @@
 #include "SwapChain.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 SwapChain *SwapChain::createSwapChain(const Device *device, const VkSurfaceKHR &surface, Window *window)
@@ -186,7 +186,7 @@ void SwapChain::createFramebuffers(const VkDevice &device)
     }
 }
 
-VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR> &surfaceFormats)
+VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &surfaceFormats)
 {
     if (surfaceFormats.size() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
     {
@@ -204,7 +204,7 @@ VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const vector<VkSurfaceForm
     return surfaceFormats[0];
 }
 
-VkPresentModeKHR SwapChain::chooseSwapPresentMode(const vector<VkPresentModeKHR> &presentModes)
+VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &presentModes)
 {
     VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
 
@@ -253,4 +253,4 @@ SwapChain::~SwapChain()
         vkDestroySwapchainKHR(device, vulkanSwapChain, nullptr);
 }
 
-} // namespace VkDemos
+}

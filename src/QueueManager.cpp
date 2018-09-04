@@ -1,20 +1,20 @@
 #include "QueueManager.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
-vector<VkQueueFamilyProperties> QueueManager::getQueueFamilies(const VkPhysicalDevice &device)
+	std::vector<VkQueueFamilyProperties> QueueManager::getQueueFamilies(const VkPhysicalDevice &device)
 {
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
-    vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
     return queueFamilies;
 }
 
-bool QueueManager::hasGraphicQueueFamily(vector<VkQueueFamilyProperties> queueFamilies)
+bool QueueManager::hasGraphicQueueFamily(std::vector<VkQueueFamilyProperties> queueFamilies)
 {
     for (const auto &queueFamily : queueFamilies)
         if (isGraphicQueueFamily(queueFamily))
@@ -25,7 +25,7 @@ bool QueueManager::hasGraphicQueueFamily(vector<VkQueueFamilyProperties> queueFa
 
 bool QueueManager::hasGraphicQueueFamily(const VkPhysicalDevice &device)
 {
-    vector<VkQueueFamilyProperties> queueFamilies = getQueueFamilies(device);
+	std::vector<VkQueueFamilyProperties> queueFamilies = getQueueFamilies(device);
 
     for (const auto &queueFamily : queueFamilies)
         if (isGraphicQueueFamily(queueFamily))
@@ -41,7 +41,7 @@ bool QueueManager::isGraphicQueueFamily(const VkQueueFamilyProperties &queueFami
 
 uint32_t QueueManager::getGraphicQueueFamilyIndex(const VkPhysicalDevice &physicalDevice)
 {
-    vector<VkQueueFamilyProperties> queueFamilies = QueueManager::getQueueFamilies(physicalDevice);
+	std::vector<VkQueueFamilyProperties> queueFamilies = QueueManager::getQueueFamilies(physicalDevice);
 
     for (uint32_t i = 0; i != queueFamilies.size(); i++)
         if (QueueManager::isGraphicQueueFamily(queueFamilies[i]))
@@ -52,7 +52,7 @@ uint32_t QueueManager::getGraphicQueueFamilyIndex(const VkPhysicalDevice &physic
 
 uint32_t QueueManager::getSurfaceQueueFamilyIndex(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface)
 {
-    vector<VkQueueFamilyProperties> queueFamilies = QueueManager::getQueueFamilies(physicalDevice);
+	std::vector<VkQueueFamilyProperties> queueFamilies = QueueManager::getQueueFamilies(physicalDevice);
 
     for (uint32_t i = 0; i != queueFamilies.size(); i++)
     {
@@ -72,4 +72,4 @@ uint32_t QueueManager::getSurfaceQueueFamilyIndex(const VkPhysicalDevice &physic
     return -1;
 }
 
-} // namespace VkDemos
+}

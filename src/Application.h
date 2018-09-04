@@ -1,10 +1,10 @@
 #ifndef APPLICATION_HEADER
 #define APPLICATION_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 #include "Window.h"
 #include "VkExtensionsConfiguration.h"
-#include "VkValidationLayerConfiguration.h"
+#include "VkInstanceLayerConfiguration.h"
 #include "VkPhysicalDeviceManager.h"
 #include "Device.h"
 #include "SwapChain.h"
@@ -15,14 +15,14 @@
 #include "GraphicPipeline.h"
 #include "CommandManager.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 class Application : public WindowInputDeviceHandler
 {
 
 private:
-  VkDemos::Window *window = nullptr;
+	VkBootstrap::Window *window = nullptr;
   VkInstance vulkanInstance = VK_NULL_HANDLE;
   Device *device = nullptr;
   VkSurfaceKHR surface = VK_NULL_HANDLE;
@@ -53,6 +53,6 @@ public:
   ~Application();
 };
 
-} // namespace VkDemos
+}
 
 #endif

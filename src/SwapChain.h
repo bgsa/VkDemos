@@ -1,12 +1,12 @@
 #ifndef SWAP_CHAIN_HEADER
 #define SWAP_CHAIN_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 #include "Device.h"
 #include "SwapChainProperties.hpp"
 #include "Window.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class SwapChain
 {
@@ -15,8 +15,8 @@ private:
   VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
   VkRenderPassBeginInfo renderPassInfo = {};
 
-  static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR> &surfaceFormats);
-  static VkPresentModeKHR chooseSwapPresentMode(const vector<VkPresentModeKHR> &presentModes);
+  static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &surfaceFormats);
+  static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &presentModes);
   static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfacecapabilities, Window *window);
 
   void createImageViews(const VkDevice &device);
@@ -38,6 +38,6 @@ public:
 
   ~SwapChain();
 };
-} // namespace VkDemos
+}
 
 #endif

@@ -1,6 +1,6 @@
 #include "CommandManager.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 static CommandManager *commandManager = nullptr;
@@ -45,4 +45,4 @@ CommandManager::~CommandManager()
     commandPool = VK_NULL_HANDLE;
 }
 
-} // namespace VkDemos
+}

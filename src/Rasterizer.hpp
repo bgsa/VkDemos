@@ -1,9 +1,9 @@
 #ifndef RASTERIZER_HEADER
 #define RASTERIZER_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class Rasterizer
 {
@@ -29,6 +29,6 @@ class Rasterizer
         return rasterizers;
     }
 };
-} // namespace VkDemos
+}
 
 #endif

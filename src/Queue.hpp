@@ -1,9 +1,9 @@
 #ifndef QUEUE_HEADER
 #define QUEUE_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class Queue
 {
@@ -22,6 +22,6 @@ public:
     this->queue = queue;
   }
 };
-} // namespace VkDemos
+}
 
 #endif

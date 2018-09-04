@@ -1,6 +1,6 @@
 #include "VkPhysicalDeviceManager.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 VkPhysicalDeviceManager::VkPhysicalDeviceManager(const VkInstance &instance)
@@ -16,20 +16,20 @@ uint32_t VkPhysicalDeviceManager::getSupportedDevicesCount()
     return deviceCount;
 }
 
-vector<VkPhysicalDevice> VkPhysicalDeviceManager::getSupportedDevices()
+std::vector<VkPhysicalDevice> VkPhysicalDeviceManager::getSupportedDevices()
 {
     uint32_t deviceCount = getSupportedDevicesCount();
 
-    vector<VkPhysicalDevice> devices(deviceCount);
+	std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(vulkanInstance, &deviceCount, devices.data());
 
     return devices;
 }
 
-vector<VkPhysicalDevice> VkPhysicalDeviceManager::findGraphicalDevices()
+std::vector<VkPhysicalDevice> VkPhysicalDeviceManager::findGraphicalDevices()
 {
-    vector<VkPhysicalDevice> devices = getSupportedDevices();
-    vector<VkPhysicalDevice> graphicalDevices;
+	std::vector<VkPhysicalDevice> devices = getSupportedDevices();
+	std::vector<VkPhysicalDevice> graphicalDevices;
 
     for (const VkPhysicalDevice &device : devices)
     {
@@ -45,25 +45,25 @@ vector<VkPhysicalDevice> VkPhysicalDeviceManager::findGraphicalDevices()
 
 VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice()
 {
-    vector<VkPhysicalDevice> devices = findGraphicalDevices();
-    vector<const char *> deviceExtensionsRequired = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+	std::vector<VkPhysicalDevice> devices = findGraphicalDevices();
+	std::vector<const char *> deviceExtensionsRequired = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
 
     VkPhysicalDevice device = findSuitableGraphicalDevice(devices, deviceExtensionsRequired);
 
     return device;
 }
 
-VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<const char *> requiredExtensions)
+VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(std::vector<const char *> requiredExtensions)
 {
-    vector<VkPhysicalDevice> devices = findGraphicalDevices();
+	std::vector<VkPhysicalDevice> devices = findGraphicalDevices();
     VkPhysicalDevice device = findSuitableGraphicalDevice(devices, requiredExtensions);
 
     return device;
 }
 
-VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkPhysicalDevice> devices, vector<const char *> requiredExtensions)
+VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(std::vector<VkPhysicalDevice> devices, std::vector<const char *> requiredExtensions)
 {
-    int suitableDevice = -1;
+    size_t suitableDevice = -1;
 
     for (size_t i = 0; i != devices.size(); i++)
     {
@@ -101,9 +101,9 @@ VkPhysicalDevice VkPhysicalDeviceManager::findSuitableGraphicalDevice(vector<VkP
     return device;
 }
 
-bool VkPhysicalDeviceManager::hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, vector<const char *> requiredExtensions)
+bool VkPhysicalDeviceManager::hasSupportedExtensions(const VkPhysicalDevice &physicalDevice, std::vector<const char *> requiredExtensions)
 {
-    vector<VkExtensionProperties> availableExtensions = VkPhysicalDeviceManager::getSupportedExtensions(physicalDevice);
+	std::vector<VkExtensionProperties> availableExtensions = VkPhysicalDeviceManager::getSupportedExtensions(physicalDevice);
 
     for (const char *requiredExtension : requiredExtensions)
     {
@@ -111,7 +111,7 @@ bool VkPhysicalDeviceManager::hasSupportedExtensions(const VkPhysicalDevice &phy
 
         for (const auto &extension : availableExtensions)
         {
-            if (string(extension.extensionName) == string(requiredExtension))
+            if (std::string(extension.extensionName) == std::string(requiredExtension))
             {
                 found = true;
                 break;
@@ -125,9 +125,9 @@ bool VkPhysicalDeviceManager::hasSupportedExtensions(const VkPhysicalDevice &phy
     return true;
 }
 
-bool VkPhysicalDeviceManager::hasSupportedExtension(const VkPhysicalDevice &physicalDevice, string extensionName)
+bool VkPhysicalDeviceManager::hasSupportedExtension(const VkPhysicalDevice &physicalDevice, std::string extensionName)
 {
-    vector<VkExtensionProperties> availableExtensions = VkPhysicalDeviceManager::getSupportedExtensions(physicalDevice);
+	std::vector<VkExtensionProperties> availableExtensions = VkPhysicalDeviceManager::getSupportedExtensions(physicalDevice);
 
     for (const auto &extension : availableExtensions)
         if (extension.extensionName == extensionName)
@@ -136,12 +136,12 @@ bool VkPhysicalDeviceManager::hasSupportedExtension(const VkPhysicalDevice &phys
     return false;
 }
 
-vector<VkExtensionProperties> VkPhysicalDeviceManager::getSupportedExtensions(const VkPhysicalDevice &physicalDevice)
+std::vector<VkExtensionProperties> VkPhysicalDeviceManager::getSupportedExtensions(const VkPhysicalDevice &physicalDevice)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
 
-    vector<VkExtensionProperties> supportedExtensions(extensionCount);
+	std::vector<VkExtensionProperties> supportedExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, supportedExtensions.data());
 
     return supportedExtensions;
@@ -149,7 +149,7 @@ vector<VkExtensionProperties> VkPhysicalDeviceManager::getSupportedExtensions(co
 
 void VkPhysicalDeviceManager::printSupportedDevices()
 {
-    vector<VkPhysicalDevice> devices = getSupportedDevices();
+	std::vector<VkPhysicalDevice> devices = getSupportedDevices();
 
     VkLogger::info("Devices:");
     for (const VkPhysicalDevice &device : devices)
@@ -202,7 +202,7 @@ bool VkPhysicalDeviceManager::isVirtualGpuDevice(const VkPhysicalDevice &device)
     return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU;
 }
 
-string VkPhysicalDeviceManager::getPhysicalTypeDescription(VkPhysicalDeviceType deviceType)
+std::string VkPhysicalDeviceManager::getPhysicalTypeDescription(VkPhysicalDeviceType deviceType)
 {
     if (deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
         return "Discrete GPU";
@@ -216,10 +216,10 @@ string VkPhysicalDeviceManager::getPhysicalTypeDescription(VkPhysicalDeviceType 
         return "Unknown";
 }
 
-vector<const char *> VkPhysicalDeviceManager::getRequiredExtensionsForGraphic()
+std::vector<const char *> VkPhysicalDeviceManager::getRequiredExtensionsForGraphic()
 {
-    vector<const char *> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+	std::vector<const char *> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     return extensions;
 }
 
-} // namespace VkDemos
+}

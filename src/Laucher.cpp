@@ -1,19 +1,17 @@
 
 #include "Application.h"
 
-using namespace std;
-
 int main(int argc, char const *argv[])
 {
-    VkDemos::Application *application = new VkDemos::Application;
+    VkBootstrap::Application *application = new VkBootstrap::Application;
 
     try
     {
         application->run();
     }
-    catch (const exception &e)
+    catch (const std::exception &e)
     {
-        VkDemos::VkLogger::error(e);
+		VkBootstrap::VkLogger::error(e);
 
         delete application;
 

@@ -1,6 +1,6 @@
 #include "GraphicPipeline.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 GraphicPipeline::GraphicPipeline(const Device *device, Shader *shader, SwapChain *swapChain, Viewport *viewport)
@@ -88,4 +88,4 @@ GraphicPipeline::~GraphicPipeline()
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
 
-} // namespace VkDemos
+}

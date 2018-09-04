@@ -1,14 +1,14 @@
 #ifndef COMMAND_MANAGER_HEADER
 #define COMMAND_MANAGER_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 #include "QueueManager.h"
 #include "SwapChain.h"
 #include "GraphicPipeline.h"
 #include "Device.h"
 #include "Command.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class CommandManager
 {
@@ -27,6 +27,6 @@ public:
 
   ~CommandManager();
 };
-} // namespace VkDemos
+}
 
 #endif

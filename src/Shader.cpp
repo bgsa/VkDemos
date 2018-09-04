@@ -1,6 +1,6 @@
 #include "Shader.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 Shader *Shader::createShader(const Device *device, const std::string &vertexShaderFilename, const std::string &fragmentShaderFilename)
@@ -73,4 +73,4 @@ Shader::~Shader()
     }
 }
 
-} // namespace VkDemos
+}

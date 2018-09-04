@@ -1,6 +1,6 @@
 #include "Viewport.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 Viewport::Viewport(int width, int height)
@@ -36,4 +36,4 @@ VkPipelineViewportStateCreateInfo *Viewport::getViewportState()
     return viewportStates;
 }
 
-} // namespace VkDemos
+}

@@ -1,6 +1,6 @@
 #include "ShaderManager.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 VkShaderModule *ShaderManager::createShaderModule(const VkDevice &device, const File *shaderFile)
@@ -20,4 +20,4 @@ VkShaderModule *ShaderManager::createShaderModule(const VkDevice &device, const 
     return shaderModule;
 }
 
-} // namespace VkDemos
+}

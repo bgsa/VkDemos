@@ -3,46 +3,44 @@
 
 #include <iostream>
 
-using namespace std;
-
-namespace VkDemos
+namespace VkBootstrap
 {
 class VkLogger
 {
   public:
-    static void error(const exception &e)
+    static void error(const std::exception &e)
     {
-        error(e.what());
+		error(e.what());
     }
 
     static void error(int code, const char *message)
     {
-        cerr << "Error " << code << ": " << message << endl;
+		std::cerr << "Error " << code << ": " << message << std::endl;
     }
 
     static void error(const char *message)
     {
-        cerr << "Error: " << message << endl;
+		std::cerr << "Error: " << message << std::endl;
     }
 
     static void info(const char *message)
     {
-        cout << "Info: " << message << endl;
+		std::cout << "Info: " << message << std::endl;
     }
 
-    static void info(const string message)
+    static void info(const std::string message)
     {
-        cout << "Info: " << message << endl;
+		std::cout << "Info: " << message << std::endl;
     }
 
     static void debug(const char *message)
     {
-        cout << "Debug: " << message << endl;
+		std::cout << "Debug: " << message << std::endl;
     }
 
-    static ostream &getOutputStream()
+    static std::ostream &getOutputStream()
     {
-        return cout;
+        return std::cout;
     }
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(
@@ -51,23 +49,23 @@ class VkLogger
         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
         void *pUserData)
     {
-        string infoLevel = "Info: ";
+        std::string infoLevel = "Info: ";
 
         if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
             infoLevel = "Warning: ";
         else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
             infoLevel = "Error: ";
 
-        cout
-            << infoLevel << "Instance layer: " << endl
-            << "    Message Type: " << messageType << endl
-            << "    Message Id: " << pCallbackData->pMessageIdName << endl
-            << "    Massage: " << pCallbackData->pMessage << endl
-            << "    Callback Type: " << pCallbackData->sType << endl;
+		std::cout
+            << infoLevel << "Instance layer: " << std::endl
+            << "    Message Type: " << messageType << std::endl
+            << "    Message Id: " << pCallbackData->pMessageIdName << std::endl
+            << "    Massage: " << pCallbackData->pMessage << std::endl
+            << "    Callback Type: " << pCallbackData->sType << std::endl;
 
         return VK_FALSE;
     }
 };
-} // namespace VkDemos
+}
 
 #endif

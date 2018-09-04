@@ -1,9 +1,9 @@
 #include "Device.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
-Device::Device(const VkInstance &vulkanInstance, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
+Device::Device(const VkInstance &vulkanInstance, const VkSurfaceKHR &surface, const std::vector<const char *> &extensions)
 {
     VkPhysicalDeviceManager deviceManager(vulkanInstance);
 
@@ -12,22 +12,22 @@ Device::Device(const VkInstance &vulkanInstance, const VkSurfaceKHR &surface, co
     createDevices(physicalDevice, surface, extensions);
 }
 
-Device::Device(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
+Device::Device(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const std::vector<const char *> &extensions)
 {
     createDevices(physicalDevice, surface, extensions);
 }
 
-void Device::createDevices(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const vector<const char *> &extensions)
+void Device::createDevices(const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface, const std::vector<const char *> &extensions)
 {
     this->physicalDevice = physicalDevice;
 
     uint32_t graphicQueueIndex = QueueManager::getGraphicQueueFamilyIndex(physicalDevice);
     uint32_t presentQueueIndex = QueueManager::getSurfaceQueueFamilyIndex(physicalDevice, surface);
-    set<uint32_t> queueFamilies = {graphicQueueIndex, presentQueueIndex};
+	std::set<uint32_t> queueFamilies = {graphicQueueIndex, presentQueueIndex};
 
     float queuePriority = 1.0f;
 
-    vector<VkDeviceQueueCreateInfo> queueInfos;
+	std::vector<VkDeviceQueueCreateInfo> queueInfos;
     for (int queueFamily : queueFamilies)
     {
         VkDeviceQueueCreateInfo queueCreateInfo = {};
@@ -51,9 +51,9 @@ void Device::createDevices(const VkPhysicalDevice &physicalDevice, const VkSurfa
     createInfo.enabledLayerCount = 0;
 
 #if DEBUG
-    const vector<const char *> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
+    const std::vector<const char *> validationLayers = {"VK_LAYER_LUNARG_standard_validation"};
 
-    if (VkValidationLayerConfiguration::isInstanceLayerSupported(validationLayers[0]))
+    if (VkInstanceLayerConfiguration::isInstanceLayerSupported(validationLayers[0]))
     {
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -61,7 +61,7 @@ void Device::createDevices(const VkPhysicalDevice &physicalDevice, const VkSurfa
 #endif
 
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS)
-        throw runtime_error("failed to create logical device!");
+        throw std::runtime_error("failed to create logical device!");
 
     createQueues(surface);
 }
@@ -84,4 +84,4 @@ Device::~Device()
     logicalDevice = VK_NULL_HANDLE;
 }
 
-} // namespace VkDemos
+}

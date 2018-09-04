@@ -1,9 +1,9 @@
 #ifndef VIEWPORT_HEADER
 #define VIEWPORT_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class Viewport
 {
@@ -16,6 +16,6 @@ class Viewport
 
     VkPipelineViewportStateCreateInfo *getViewportState();
 };
-} // namespace VkDemos
+}
 
 #endif

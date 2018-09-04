@@ -1,6 +1,6 @@
 #include "Command.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 Command::Command(const VkDevice &device, SwapChain *swapChain, const VkCommandPool &commandPool, GraphicPipeline *graphicPipeline)
@@ -8,7 +8,7 @@ Command::Command(const VkDevice &device, SwapChain *swapChain, const VkCommandPo
     this->swapChain = swapChain;
     this->graphicPipeline = graphicPipeline;
 
-    uint32_t commandBufferCount = swapChain->framebuffers.size();
+    uint32_t commandBufferCount = static_cast<uint32_t>(swapChain->framebuffers.size());
     commandBuffers.resize(commandBufferCount);
 
     VkCommandBufferAllocateInfo allocInfo = {};
@@ -52,13 +52,12 @@ void Command::end()
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
             throw std::runtime_error("failed to record command buffer!");
     }
-
-    commandBuffers.clear();
 }
 
 Command::~Command()
 {
-    end();
+    //end();
+	//commandBuffers.clear();
 }
 
-} // namespace VkDemos
+}

@@ -1,11 +1,11 @@
 #ifndef SHADER_HEADER
 #define SHADER_HEADER
 
-#include "VkDemosHeader.h"
+#include "VkBootstrapHeader.h"
 #include "ShaderManager.h"
 #include "Device.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 class Shader
 {
@@ -24,6 +24,6 @@ public:
 
   ~Shader();
 };
-} // namespace VkDemos
+}
 
 #endif

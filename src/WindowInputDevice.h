@@ -6,7 +6,7 @@
 #include "InputDevice.h"
 #include "WindowInputDeviceHandler.h"
 
-namespace VkDemos
+namespace VkBootstrap
 {
 
 class WindowInputDevice : public InputDevice
@@ -39,6 +39,6 @@ class WindowInputDevice : public InputDevice
 	}
 };
 
-} // namespace VkDemos
+}
 
 #endif
