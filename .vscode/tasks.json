@@ -4,11 +4,59 @@
     "tasks": [
         {
             "label": "Clean-Linux",
-            "command": "clear && mkdir -p ${workspaceRoot}/build/ && rm -rf ${workspaceRoot}/build/*",
+            "command": "clear"
+        },
+        {
+            "label": "Delete-Build-Dir-Linux",
+            "command": "rm -rf ${workspaceRoot}/build/*",
+            "dependsOn": [
+                "Clean-Linux"
+            ]
+        },
+        {
+            "label": "Make-Build-Dir-Linux",
+            "command": "mkdir -p ${workspaceRoot}/build/",
+            "dependsOn": [
+                "Delete-Build-Dir-Linux"
+            ]
+        },
+        {
+            "label": "Build-Linux",
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "command": "g++",
+            "args": [
+                "-g",
+                "-Wall",
+                "-std=c++11",
+                "-fexceptions",
+                "-DDEBUG",
+                "-DLINUX",
+                "../src/*.cpp",
+                "-I./../include",
+                "-L/Users/Bruno/Tools/vulkansdk-1.1.82.1/macOS/lib",
+                "-lvulkan",
+                "-lglfw3",
+                "-framework",
+                "OpenGL",
+                "-framework",
+                "Cocoa",
+                "-framework",
+                "IOKit",
+                "-framework",
+                "CoreVideo",
+                "-o",
+                "VkDemo"
+            ],
+            "dependsOn": [
+                "Make-Build-Dir-Linux"
+            ],
+            "problemMatcher": []
         },
         {
             "label": "Clean-Windows",
-            "command": "cls",
+            "command": "cls"
         },
         {
             "label": "Delete-Build-Dir-Windows",

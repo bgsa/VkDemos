@@ -10,6 +10,12 @@
 
 	#include <Windows.h>
 #endif
+#ifdef LINUX
+//#define VK_USE_PLATFORM_XLIB_KHR
+#endif
+#ifdef ANDROID
+#define VK_USE_PLATFORM_ANDROID_KHR
+#endif
 
 #include <limits>
 #include <iostream>
