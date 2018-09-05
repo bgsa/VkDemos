@@ -13,6 +13,7 @@ class Viewport
 
   public:
     Viewport(int width, int height);
+	void setSize(int width, int height);
 
     VkPipelineViewportStateCreateInfo *getViewportState();
 };

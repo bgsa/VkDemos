@@ -26,6 +26,7 @@ private:
   VkInstance vulkanInstance = VK_NULL_HANDLE;
   Device *device = nullptr;
   VkSurfaceKHR surface = VK_NULL_HANDLE;
+  Viewport *viewport = nullptr;
   SwapChain *swapChain = nullptr;
   GraphicPipeline *graphicPipeline = nullptr;
   CommandManager *commandManager = nullptr;

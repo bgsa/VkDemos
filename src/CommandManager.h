@@ -2,7 +2,6 @@
 #define COMMAND_MANAGER_HEADER
 
 #include "VkBootstrapHeader.h"
-#include "QueueManager.h"
 #include "SwapChain.h"
 #include "GraphicPipeline.h"
 #include "Device.h"
@@ -20,7 +19,7 @@ private:
 public:
   VkCommandPool commandPool = VK_NULL_HANDLE;
 
-  static void init(const Device *device, SwapChain *swapChain, GraphicPipeline *graphicPipeline);
+  static void init(const Device *device);
   Command *createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain);
 
   static CommandManager *getInstance();

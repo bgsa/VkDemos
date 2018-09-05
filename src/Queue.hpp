@@ -5,23 +5,23 @@
 
 namespace VkBootstrap
 {
-class Queue
-{
-public:
-  uint32_t index = -1;
-  VkQueue queue = VK_NULL_HANDLE;
 
-  Queue()
-  {
-    ;
-  }
+	class Queue
+	{
+	public:
+		uint32_t index = -1;
+		VkQueue queue = VK_NULL_HANDLE;
 
-  Queue(uint32_t index, VkQueue queue)
-  {
-    this->index = index;
-    this->queue = queue;
-  }
-};
+		Queue() {}
+
+		Queue(uint32_t index, VkQueue queue)
+		{
+			this->index = index;
+			this->queue = queue;
+		}
+
+	};
+
 }
 
 #endif

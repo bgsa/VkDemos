@@ -5,8 +5,10 @@ namespace VkBootstrap
 
 Command::Command(const VkDevice &device, SwapChain *swapChain, const VkCommandPool &commandPool, GraphicPipeline *graphicPipeline)
 {
+	this->device = device;
     this->swapChain = swapChain;
     this->graphicPipeline = graphicPipeline;
+	this->commandPool = commandPool;
 
     uint32_t commandBufferCount = static_cast<uint32_t>(swapChain->framebuffers.size());
     commandBuffers.resize(commandBufferCount);
@@ -56,8 +58,8 @@ void Command::end()
 
 Command::~Command()
 {
-    //end();
-	//commandBuffers.clear();
+	if (commandBuffers.size() != 0)
+		vkFreeCommandBuffers(device, commandPool, (uint32_t)commandBuffers.size(), commandBuffers.data());
 }
 
 }

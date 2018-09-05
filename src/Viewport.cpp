@@ -5,8 +5,13 @@ namespace VkBootstrap
 
 Viewport::Viewport(int width, int height)
 {
-    this->width = width;
-    this->height = height;
+	setSize(width, height);
+}
+
+void Viewport::setSize(int width, int height)
+{
+	this->width = width;
+	this->height = height;
 }
 
 VkPipelineViewportStateCreateInfo *Viewport::getViewportState()

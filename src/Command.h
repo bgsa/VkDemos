@@ -11,6 +11,8 @@ namespace VkBootstrap
 class Command
 {
   private:
+	  VkDevice device = VK_NULL_HANDLE;
+	  VkCommandPool commandPool = VK_NULL_HANDLE;
     SwapChain *swapChain = nullptr;
     GraphicPipeline *graphicPipeline = nullptr;
 

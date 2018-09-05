@@ -5,13 +5,13 @@ namespace VkBootstrap
 
 static CommandManager *commandManager = nullptr;
 
-void CommandManager::init(const Device *device, SwapChain *swapChain, GraphicPipeline *graphicPipeline)
+void CommandManager::init(const Device *device)
 {
     commandManager = new CommandManager(device);
 
     VkCommandPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = QueueManager::getGraphicQueueFamilyIndex(device->physicalDevice);
+	poolInfo.queueFamilyIndex = device->queueManager->getGraphicQueueFamily()->getIndex();
     poolInfo.flags = 0; // Optional
 
     VkResult operationResult = vkCreateCommandPool(device->logicalDevice, &poolInfo, nullptr, &commandManager->commandPool);
