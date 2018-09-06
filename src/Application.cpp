@@ -31,33 +31,41 @@ namespace VkBootstrap
 		command->end();
 
 		size_t currentFrame = 0;
+		uint32_t imageIndex = 0;
+		uint32_t fenceCount = 1;
+		VkBool32 waitAllSemaphores = VK_TRUE;
+		uint64_t semaphoresTimeout = std::numeric_limits<uint64_t>::max();
 
 		while (isRunning)
 		{
 			window->update(0);
 
-			vkWaitForFences(device->logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+			vkWaitForFences(device->logicalDevice, 1, &inFlightFences[currentFrame], waitAllSemaphores, semaphoresTimeout);
 			vkResetFences(device->logicalDevice, 1, &inFlightFences[currentFrame]);
 
 			VkSwapchainKHR swapChains[] = { swapChain->vulkanSwapChain };
-			VkSemaphore waitSemaphores[] = { imageAvailableSemaphore[currentFrame] };
-			VkSemaphore signalSemaphores[] = { renderFinishedSemaphore[currentFrame] };
+			VkSemaphore imageAvailableSemaphores[] = { imageAvailableSemaphore[currentFrame] };
+			VkSemaphore renderFinishedSemaphores[] = { renderFinishedSemaphore[currentFrame] };
 			VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+						
+			VkResult operationResult = vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, semaphoresTimeout, imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-			uint32_t imageIndex;
-			vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
+			//TODO: when its out of date, the swapChain must be recreated
+			//if (operationResult == VK_ERROR_OUT_OF_DATE_KHR)
+				//recreateSwapChain();
 
 			VkSubmitInfo submitInfo = {};
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			submitInfo.pWaitDstStageMask = waitStages;
 			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = waitSemaphores;
+			submitInfo.pWaitSemaphores = imageAvailableSemaphores;
 			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = signalSemaphores;
+			submitInfo.pSignalSemaphores = renderFinishedSemaphores;
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = &command->commandBuffers[imageIndex];
+			//submitInfo.pCommandBuffers = &command->commandBuffers[0];
 
-			VkResult operationResult = vkQueueSubmit(device->queueManager->getGraphicQueueFamily()->getQueues()[0]->queue, 1, &submitInfo, inFlightFences[currentFrame]);
+			operationResult = vkQueueSubmit(device->queueManager->getGraphicQueueFamily()->getQueues()[0]->queue, 1, &submitInfo, inFlightFences[currentFrame]);
 
 			if (operationResult != VK_SUCCESS)
 				throw std::runtime_error("failed to submit draw command buffer: " + VkHelper::getVkResultDescription(operationResult));
@@ -65,7 +73,7 @@ namespace VkBootstrap
 			VkPresentInfoKHR presentInfo = {};
 			presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 			presentInfo.waitSemaphoreCount = 1;
-			presentInfo.pWaitSemaphores = signalSemaphores;
+			presentInfo.pWaitSemaphores = renderFinishedSemaphores;
 			presentInfo.swapchainCount = 1;
 			presentInfo.pSwapchains = swapChains;
 			presentInfo.pImageIndices = &imageIndex;
@@ -78,7 +86,7 @@ namespace VkBootstrap
 
 			currentFrame = (currentFrame + 1) % MAX_FRAMEBUFFER;
 
-			vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
+			//vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
 		}
 
 		vkDeviceWaitIdle(device->logicalDevice);

@@ -8,24 +8,24 @@
 namespace VkBootstrap
 {
 
-class Command
-{
-  private:
-	  VkDevice device = VK_NULL_HANDLE;
-	  VkCommandPool commandPool = VK_NULL_HANDLE;
-    SwapChain *swapChain = nullptr;
-    GraphicPipeline *graphicPipeline = nullptr;
+	class Command
+	{
+	private:
+		VkDevice device = VK_NULL_HANDLE;
+		VkCommandPool commandPool = VK_NULL_HANDLE;
+		SwapChain *swapChain = nullptr;
+		GraphicPipeline *graphicPipeline = nullptr;
 
-  public:
-    std::vector<VkCommandBuffer> commandBuffers;
+	public:
+		std::vector<VkCommandBuffer> commandBuffers;
 
-    Command(const VkDevice &device, SwapChain *swapChain, const VkCommandPool &commandPool, GraphicPipeline *graphicPipeline);
+		Command(const VkDevice &device, SwapChain *swapChain, const VkCommandPool &commandPool, GraphicPipeline *graphicPipeline);
 
-    void begin();
-    void end();
+		void begin();
+		void end();
 
-    ~Command();
-};
+		~Command();
+	};
 
 }
 

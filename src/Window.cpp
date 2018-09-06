@@ -1,106 +1,104 @@
 #include "Window.h"
 
-#include <glfw/glfw3native.h>
-
 namespace VkBootstrap
 {
 
-void Window::createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface)
-{
-    VkResult operationResult = glfwCreateWindowSurface(vulkanInstance, windowHandler, nullptr, surface);
+	void Window::createSurface(const VkInstance &vulkanInstance, VkSurfaceKHR *surface)
+	{
+		VkResult operationResult = glfwCreateWindowSurface(vulkanInstance, windowHandler, nullptr, surface);
 
-    if (operationResult != VK_SUCCESS)
-        throw std::runtime_error("failed to create window surface!");
-}
+		if (operationResult != VK_SUCCESS)
+			throw std::runtime_error("failed to create window surface!");
+	}
 
-static void eventClose(GLFWwindow *windowHandler)
-{
-    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(windowHandler));
+	static void eventClose(GLFWwindow *windowHandler)
+	{
+		Window *window = static_cast<Window *>(glfwGetWindowUserPointer(windowHandler));
 
-    WindowInputDeviceHandler **handlers = window->getHandlers();
+		WindowInputDeviceHandler **handlers = window->getHandlers();
 
-    for (size_t i = 0; i != window->getHandlersCount(); i++)
-        handlers[i]->window_OnClose();
-}
+		for (size_t i = 0; i != window->getHandlersCount(); i++)
+			handlers[i]->window_OnClose();
+	}
 
-static void eventResize(GLFWwindow *windowHandler, int width, int height)
-{
-    Window *window = static_cast<Window *>(glfwGetWindowUserPointer(windowHandler));
+	static void eventResize(GLFWwindow *windowHandler, int width, int height)
+	{
+		Window *window = static_cast<Window *>(glfwGetWindowUserPointer(windowHandler));
 
-    WindowInputDeviceHandler **handlers = window->getHandlers();
+		WindowInputDeviceHandler **handlers = window->getHandlers();
 
-    for (size_t i = 0; i != window->getHandlersCount(); i++)
-        handlers[i]->window_OnResize(width, height);
-}
+		for (size_t i = 0; i != window->getHandlersCount(); i++)
+			handlers[i]->window_OnResize(width, height);
+	}
 
-void Window::setup(VkBootstrap::WindowInfo &windowInfo)
-{
-    glfwSetErrorCallback(VkBootstrap::VkLogger::error);
+	void Window::setup(VkBootstrap::WindowInfo &windowInfo)
+	{
+		glfwSetErrorCallback(VkBootstrap::VkLogger::error);
 
-    if (!glfwInit())
-        throw std::runtime_error("failed to init GLFW!");
+		if (!glfwInit())
+			throw std::runtime_error("failed to init GLFW!");
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, windowInfo.isResizable());
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, windowInfo.isResizable());
 
-    windowHandler = glfwCreateWindow(windowInfo.getWidth(), windowInfo.getHeight(), windowInfo.getWindowName().c_str(), NULL, NULL);
-    if (!windowHandler)
-    {
-        glfwTerminate();
-        throw std::runtime_error("failed to create GLFW window!");
-    }
+		windowHandler = glfwCreateWindow(windowInfo.getWidth(), windowInfo.getHeight(), windowInfo.getWindowName().c_str(), NULL, NULL);
+		if (!windowHandler)
+		{
+			glfwTerminate();
+			throw std::runtime_error("failed to create GLFW window!");
+		}
 
-    glfwSetWindowUserPointer(windowHandler, this);
+		glfwSetWindowUserPointer(windowHandler, this);
 
-    glfwSetWindowCloseCallback(windowHandler, eventClose);
-    glfwSetWindowSizeCallback(windowHandler, eventResize);
-    //glfwSetFramebufferSizeCallback(windowHandler, eventResize);
+		glfwSetWindowCloseCallback(windowHandler, eventClose);
+		glfwSetWindowSizeCallback(windowHandler, eventResize);
+		//glfwSetFramebufferSizeCallback(windowHandler, eventResize);
 
-    //glfwMakeContextCurrent(windowHandler);
-}
+		//glfwMakeContextCurrent(windowHandler);
+	}
 
-Size Window::getSize()
-{
-    int width, height;
-    glfwGetWindowSize(windowHandler, &width, &height);
+	Size Window::getSize()
+	{
+		int width, height;
+		glfwGetWindowSize(windowHandler, &width, &height);
 
-    return Size{width, height};
-}
+		return Size{ width, height };
+	}
 
-void Window::update(long long elapsedTime)
-{
-    glfwPollEvents();
-}
+	void Window::update(long long elapsedTime)
+	{
+		glfwPollEvents();
+	}
 
-std::vector<const char *> Window::getRequiredExtensions()
-{
-    uint32_t glfwExtensionCount = 0;
-    const char **glfwExtensions;
-    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+	std::vector<const char *> Window::getRequiredExtensions()
+	{
+		uint32_t glfwExtensionCount = 0;
+		const char **glfwExtensions;
+		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-    std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+		std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-    return extensions;
-}
+		return extensions;
+	}
 
-void Window::printRequiredExtensions()
-{
-    auto requiredExtensions = getRequiredExtensions();
+	void Window::printRequiredExtensions()
+	{
+		auto requiredExtensions = getRequiredExtensions();
 
-    VkLogger::info(requiredExtensions.size() + " extensions required to Window System:");
-    for (const auto &requiredExtension : requiredExtensions)
-        VkLogger::info(requiredExtension);
-}
+		VkLogger::info(requiredExtensions.size() + " extensions required to Window System:");
+		for (const auto &requiredExtension : requiredExtensions)
+			VkLogger::info(requiredExtension);
+	}
 
-Window::~Window()
-{
-    if (windowHandler != nullptr)
-    {
-        glfwDestroyWindow(windowHandler);
-        windowHandler = nullptr;
-    }
+	Window::~Window()
+	{
+		if (windowHandler != nullptr)
+		{
+			glfwDestroyWindow(windowHandler);
+			windowHandler = nullptr;
+		}
 
-    glfwTerminate();
-}
+		glfwTerminate();
+	}
 
 }

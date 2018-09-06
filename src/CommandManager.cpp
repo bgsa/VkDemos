@@ -2,47 +2,47 @@
 
 namespace VkBootstrap
 {
+	static CommandManager *commandManager = nullptr;
 
-static CommandManager *commandManager = nullptr;
+	void CommandManager::init(const Device *device)
+	{
+		commandManager = new CommandManager(device);
 
-void CommandManager::init(const Device *device)
-{
-    commandManager = new CommandManager(device);
+		VkCommandPoolCreateInfo poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = device->queueManager->getGraphicQueueFamily()->getIndex();
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; //commands can be reused. Reset is explicit
+		//poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
-    VkCommandPoolCreateInfo poolInfo = {};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	poolInfo.queueFamilyIndex = device->queueManager->getGraphicQueueFamily()->getIndex();
-    poolInfo.flags = 0; // Optional
+		VkResult operationResult = vkCreateCommandPool(device->logicalDevice, &poolInfo, nullptr, &commandManager->commandPool);
 
-    VkResult operationResult = vkCreateCommandPool(device->logicalDevice, &poolInfo, nullptr, &commandManager->commandPool);
+		if (operationResult != VK_SUCCESS)
+			throw std::runtime_error("failed to create command pool!");
+	}
 
-    if (operationResult != VK_SUCCESS)
-        throw std::runtime_error("failed to create command pool!");
-}
+	Command *CommandManager::createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain)
+	{
+		Command *command = new Command(device, swapChain, commandPool, graphicPipeline);
+		return command;
+	}
 
-Command *CommandManager::createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain)
-{
-    Command *command = new Command(device, swapChain, commandPool, graphicPipeline);
-    return command;
-}
+	CommandManager::CommandManager(const Device *device)
+	{
+		this->device = device->logicalDevice;
+	}
 
-CommandManager::CommandManager(const Device *device)
-{
-    this->device = device->logicalDevice;
-}
+	CommandManager *CommandManager::getInstance()
+	{
+		if (commandManager != nullptr)
+			return commandManager;
 
-CommandManager *CommandManager::getInstance()
-{
-    if (commandManager != nullptr)
-        return commandManager;
+		return commandManager;
+	}
 
-    return commandManager;
-}
-
-CommandManager::~CommandManager()
-{
-    vkDestroyCommandPool(device, commandPool, nullptr);
-    commandPool = VK_NULL_HANDLE;
-}
+	CommandManager::~CommandManager()
+	{
+		vkDestroyCommandPool(device, commandPool, nullptr);
+		commandPool = VK_NULL_HANDLE;
+	}
 
 }

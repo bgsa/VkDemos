@@ -17,16 +17,17 @@ namespace VkBootstrap
 		swapChain->presentMode = chooseSwapPresentMode(swapChainProperties->presentModes);
 		swapChain->extent = chooseSwapExtent(swapChainProperties->capabilities, window);
 
-		//uint32_t maxImageCount = swapChainProperties->capabilities.maxImageCount;
-		uint32_t imageCount = swapChainProperties->capabilities.minImageCount;
+		uint32_t numberOfImage = swapChainProperties->capabilities.minImageCount + 1;
 
-		if (imageCount > 1)
-			imageCount = 2;
+		if (swapChainProperties->capabilities.maxImageCount > 0 && numberOfImage > swapChainProperties->capabilities.maxImageCount)
+			numberOfImage = swapChainProperties->capabilities.maxImageCount;
 
 		VkSwapchainCreateInfoKHR createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		createInfo.flags = 0;
+		createInfo.pNext = nullptr;
 		createInfo.surface = surface;
-		createInfo.minImageCount = imageCount;
+		createInfo.minImageCount = numberOfImage;
 		createInfo.imageFormat = swapChain->surfaceFormat.format;
 		createInfo.imageColorSpace = swapChain->surfaceFormat.colorSpace;
 		createInfo.imageExtent = swapChain->extent;
@@ -54,13 +55,13 @@ namespace VkBootstrap
 
 		delete swapChainProperties;
 
-		result = vkGetSwapchainImagesKHR(device->logicalDevice, swapChain->vulkanSwapChain, &imageCount, nullptr);
+		result = vkGetSwapchainImagesKHR(device->logicalDevice, swapChain->vulkanSwapChain, &numberOfImage, nullptr);
 		if (result != VK_SUCCESS)
 			throw std::runtime_error("failed to get images count from swap chain: " + VkHelper::getVkResultDescription(result));
 
-		swapChain->swapChainImages.resize(imageCount);
+		swapChain->swapChainImages.resize(numberOfImage);
 
-		result = vkGetSwapchainImagesKHR(device->logicalDevice, swapChain->vulkanSwapChain, &imageCount, swapChain->swapChainImages.data());
+		result = vkGetSwapchainImagesKHR(device->logicalDevice, swapChain->vulkanSwapChain, &numberOfImage, swapChain->swapChainImages.data());
 
 		if (result != VK_SUCCESS)
 			throw std::runtime_error("failed to get images from swap chain: " + VkHelper::getVkResultDescription(result));
