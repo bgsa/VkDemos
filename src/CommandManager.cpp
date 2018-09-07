@@ -11,8 +11,8 @@ namespace VkBootstrap
 		VkCommandPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.queueFamilyIndex = device->queueManager->getGraphicQueueFamily()->getIndex();
-		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; //commands can be reused. Reset is explicit
-		//poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+		//poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; //commands can be reused. Reset is explicit
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
 		VkResult operationResult = vkCreateCommandPool(device->logicalDevice, &poolInfo, nullptr, &commandManager->commandPool);
 
@@ -23,6 +23,9 @@ namespace VkBootstrap
 	Command *CommandManager::createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain)
 	{
 		Command *command = new Command(device, swapChain, commandPool, graphicPipeline);
+
+		commands.push_back(command);
+
 		return command;
 	}
 
@@ -39,8 +42,18 @@ namespace VkBootstrap
 		return commandManager;
 	}
 
+	void CommandManager::releaseCommands() 
+	{
+		for (Command* command : commands)
+			delete command;
+
+		commands.clear();
+	}
+
 	CommandManager::~CommandManager()
 	{
+		releaseCommands();
+
 		vkDestroyCommandPool(device, commandPool, nullptr);
 		commandPool = VK_NULL_HANDLE;
 	}

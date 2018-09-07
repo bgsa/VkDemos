@@ -21,7 +21,7 @@ namespace VkBootstrap
 
 		Command(const VkDevice &device, SwapChain *swapChain, const VkCommandPool &commandPool, GraphicPipeline *graphicPipeline);
 
-		void begin();
+		void begin(size_t frameBufferIndex);
 		void end();
 
 		~Command();

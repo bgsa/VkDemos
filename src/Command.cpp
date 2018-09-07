@@ -10,8 +10,7 @@ namespace VkBootstrap
 		this->graphicPipeline = graphicPipeline;
 		this->commandPool = commandPool;
 
-		uint32_t commandBufferCount = static_cast<uint32_t>(swapChain->framebuffers.size());
-		//uint32_t commandBufferCount = 1;
+		uint32_t commandBufferCount = 1;
 		commandBuffers.resize(commandBufferCount);
 
 		VkCommandBufferAllocateInfo allocInfo = {};
@@ -26,20 +25,18 @@ namespace VkBootstrap
 			throw std::runtime_error("failed to allocate command buffers!");
 	}
 
-	void Command::begin()
+	void Command::begin(size_t frameBufferIndex)
 	{
 		for (size_t i = 0; i != commandBuffers.size(); i++)
-			//for (size_t i = 0; i != swapChain->framebuffers.size(); i++)	
 		{
 			VkCommandBuffer commandBuffer = commandBuffers[i];
-			//VkCommandBuffer commandBuffer = commandBuffers[0];
-			VkRenderPassBeginInfo renderPassInfo = swapChain->getRenderPassBegin(i);
+			VkRenderPassBeginInfo renderPassInfo = swapChain->getRenderPassBegin(frameBufferIndex);			
 
 			VkCommandBufferBeginInfo beginInfo = {};
 			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			beginInfo.pInheritanceInfo = nullptr; // Optional
-			beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; //if the command is used many times after reconrding
-			//beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; //if the command is used only one time and reset after rendered
+			beginInfo.pInheritanceInfo = nullptr;
+			//beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; //if the command is used many times after reconrding
+			beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; //if the command is used only one time and reset after rendered
 			//beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT; //if the command is secondary and is inside a render pass
 
 			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)

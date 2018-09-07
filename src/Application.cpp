@@ -2,7 +2,6 @@
 
 namespace VkBootstrap
 {
-
 	const int MAX_FRAMEBUFFER = 2;
 
 	void Application::run()
@@ -10,31 +9,28 @@ namespace VkBootstrap
 		setupWindow();
 		setupVulkan();
 		setupSurface();
-		setupDevice();
-		setupSyncObjects();
+		setupDevice();				
 
-		Shader *shader = Shader::createShader(device, "resources/shaders/vert.spv", "resources/shaders/frag.spv");
+		start();
+	}
 
-		swapChain = SwapChain::createSwapChain(device, surface, window);
+	void Application::stop() 
+	{
+		isRunning = false;
+		vkDeviceWaitIdle(device->logicalDevice);
+	}
 
-		graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport);
-
-		CommandManager::init(device);
-		commandManager = CommandManager::getInstance();
-
-		Command *command = commandManager->createCommand(graphicPipeline, swapChain);
-		command->begin();
-
-		for (VkCommandBuffer commandBuffer : command->commandBuffers)
-			vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-		command->end();
+	void Application::start()
+	{
+		setupSwapChain();
 
 		size_t currentFrame = 0;
 		uint32_t imageIndex = 0;
 		uint32_t fenceCount = 1;
 		VkBool32 waitAllSemaphores = VK_TRUE;
 		uint64_t semaphoresTimeout = std::numeric_limits<uint64_t>::max();
+
+		isRunning = true;
 
 		while (isRunning)
 		{
@@ -47,12 +43,19 @@ namespace VkBootstrap
 			VkSemaphore imageAvailableSemaphores[] = { imageAvailableSemaphore[currentFrame] };
 			VkSemaphore renderFinishedSemaphores[] = { renderFinishedSemaphore[currentFrame] };
 			VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-						
+
 			VkResult operationResult = vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, semaphoresTimeout, imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-			//TODO: when its out of date, the swapChain must be recreated
-			//if (operationResult == VK_ERROR_OUT_OF_DATE_KHR)
-				//recreateSwapChain();
+			if (operationResult != VK_SUCCESS)
+				throw std::runtime_error("failed to acquire image: " + VkHelper::getVkResultDescription(operationResult));
+
+			Command *command = commandManager->createCommand(graphicPipeline, swapChain);
+			command->begin(imageIndex);
+
+			for (VkCommandBuffer commandBuffer : command->commandBuffers)
+				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+			command->end();
 
 			VkSubmitInfo submitInfo = {};
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -62,8 +65,7 @@ namespace VkBootstrap
 			submitInfo.signalSemaphoreCount = 1;
 			submitInfo.pSignalSemaphores = renderFinishedSemaphores;
 			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &command->commandBuffers[imageIndex];
-			//submitInfo.pCommandBuffers = &command->commandBuffers[0];
+			submitInfo.pCommandBuffers = &command->commandBuffers[0];
 
 			operationResult = vkQueueSubmit(device->queueManager->getGraphicQueueFamily()->getQueues()[0]->queue, 1, &submitInfo, inFlightFences[currentFrame]);
 
@@ -81,18 +83,41 @@ namespace VkBootstrap
 
 			operationResult = vkQueuePresentKHR(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue, &presentInfo);
 
-			if (operationResult != VK_SUCCESS)
+			if (operationResult != VK_SUCCESS) 
+			{
+				if (operationResult == VK_ERROR_OUT_OF_DATE_KHR)
+				{
+					cleanUpSwapChain();
+					setupSwapChain();
+					continue;
+				}
+
 				throw std::runtime_error("failed to present command buffer: " + VkHelper::getVkResultDescription(operationResult));
+			}
 
 			currentFrame = (currentFrame + 1) % MAX_FRAMEBUFFER;
 
-			//vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
+			vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
+
+			commandManager->releaseCommands();
 		}
 
 		vkDeviceWaitIdle(device->logicalDevice);
 
-		delete command;
-		delete shader;
+		cleanUpSwapChain();
+	}
+
+	void Application::setupSwapChain() 
+	{
+		swapChain = SwapChain::createSwapChain(device, surface, window);
+		setupSyncObjects();
+
+		shader = Shader::createShader(device, "resources/shaders/vert.spv", "resources/shaders/frag.spv");
+
+		graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport);
+
+		CommandManager::init(device);
+		commandManager = CommandManager::getInstance();
 	}
 
 	void Application::setupDevice()
@@ -231,26 +256,15 @@ namespace VkBootstrap
 		viewport->setSize(width, height);
 	}
 
-	void Application::exit()
+	void Application::cleanUpSwapChain() 
 	{
-#if DEBUG
-		VkInstanceLayerConfiguration::destroyDebugUtilsMessengerEXT(vulkanInstance, nullptr);
-#endif
-
+		vkDeviceWaitIdle(device->logicalDevice);
+		
 		if (commandManager != nullptr)
 		{
 			delete commandManager;
 			commandManager = nullptr;
 		}
-
-		for (VkSemaphore semaphore : renderFinishedSemaphore)
-			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
-
-		for (VkSemaphore semaphore : imageAvailableSemaphore)
-			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
-
-		for (VkFence fence : inFlightFences)
-			vkDestroyFence(device->logicalDevice, fence, nullptr);
 
 		if (graphicPipeline != nullptr)
 		{
@@ -258,10 +272,39 @@ namespace VkBootstrap
 			graphicPipeline = nullptr;
 		}
 
+		if (shader != nullptr) 
+		{
+			delete shader;
+			shader = nullptr;
+		}
+
 		if (swapChain != nullptr)
 		{
 			delete swapChain;
 			swapChain = nullptr;
+		}
+
+		for (VkSemaphore semaphore : renderFinishedSemaphore)
+			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
+		renderFinishedSemaphore.clear();
+
+		for (VkSemaphore semaphore : imageAvailableSemaphore)
+			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
+		imageAvailableSemaphore.clear();
+
+		for (VkFence fence : inFlightFences)
+			vkDestroyFence(device->logicalDevice, fence, nullptr);
+		inFlightFences.clear();
+	}
+
+	void Application::exit()
+	{
+		cleanUpSwapChain();
+
+		if (viewport != nullptr)
+		{
+			delete viewport;
+			viewport = nullptr;
 		}
 
 		if (device != nullptr)
@@ -275,16 +318,14 @@ namespace VkBootstrap
 			vkDestroySurfaceKHR(vulkanInstance, surface, nullptr);
 		}
 
+#if DEBUG
+		VkInstanceLayerConfiguration::destroyDebugUtilsMessengerEXT(vulkanInstance, nullptr);
+#endif
+
 		if (vulkanInstance != nullptr)
 		{
 			vkDestroyInstance(vulkanInstance, nullptr);
 			vulkanInstance = nullptr;
-		}
-
-		if (viewport != nullptr)
-		{
-			delete viewport;
-			viewport = nullptr;
 		}
 
 		if (window != nullptr)

@@ -20,6 +20,7 @@ private:
 public:
   void setup(VkBootstrap::WindowInfo &windowInfo);
   void update(long long elapsedTime);
+  void waitEvents();
 
   Size getSize();
 

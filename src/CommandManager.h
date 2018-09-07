@@ -9,23 +9,25 @@
 
 namespace VkBootstrap
 {
-class CommandManager
-{
-private:
-  VkDevice device = VK_NULL_HANDLE;
+	class CommandManager
+	{
+	private:
+		VkDevice device = VK_NULL_HANDLE;
+		std::vector<Command*> commands;
 
-  CommandManager(const Device *device);
+		CommandManager(const Device *device);
+		
+	public:
+		VkCommandPool commandPool = VK_NULL_HANDLE;
 
-public:
-  VkCommandPool commandPool = VK_NULL_HANDLE;
+		static void init(const Device *device);
+		Command *createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain);
 
-  static void init(const Device *device);
-  Command *createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain);
+		static CommandManager *getInstance();
+		void releaseCommands();
 
-  static CommandManager *getInstance();
-
-  ~CommandManager();
-};
+		~CommandManager();
+	};
 }
 
 #endif

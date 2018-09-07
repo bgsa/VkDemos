@@ -60,7 +60,8 @@ namespace VkBootstrap
 	Size Window::getSize()
 	{
 		int width, height;
-		glfwGetWindowSize(windowHandler, &width, &height);
+		//glfwGetWindowSize(windowHandler, &width, &height);
+		glfwGetFramebufferSize(windowHandler, &width, &height);
 
 		return Size{ width, height };
 	}
@@ -68,6 +69,11 @@ namespace VkBootstrap
 	void Window::update(long long elapsedTime)
 	{
 		glfwPollEvents();
+	}
+
+	void Window::waitEvents()
+	{
+		glfwWaitEvents();
 	}
 
 	std::vector<const char *> Window::getRequiredExtensions()
