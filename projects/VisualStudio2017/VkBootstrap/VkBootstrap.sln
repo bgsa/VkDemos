@@ -5,7 +5,13 @@ VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VkBootstrap", "VkBootstrap.vcxproj", "{6C2034B5-6F98-475F-8210-445591117299}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenML.Shared", "..\..\..\dependencies\openml\OpenML.Shared\OpenML.Shared.vcxitems", "{F7A2DD82-407D-41DE-9A22-6860EC4385BA}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\..\..\dependencies\openml\OpenML.Shared\OpenML.Shared.vcxitems*{6c2034b5-6f98-475f-8210-445591117299}*SharedItemsImports = 4
+		..\..\..\dependencies\openml\OpenML.Shared\OpenML.Shared.vcxitems*{f7a2dd82-407d-41de-9a22-6860ec4385ba}*SharedItemsImports = 9
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86

@@ -42,6 +42,8 @@ namespace VkBootstrap
 		for (QueueFamily* queueFamily : queuesFamily)
 			if (queueFamily->isGraphicFamily())
 				return queueFamily;
+
+		return nullptr;
 	}
 
 	QueueFamily* QueueManager::getTransferQueueFamily()
@@ -49,6 +51,8 @@ namespace VkBootstrap
 		for (QueueFamily* queueFamily : queuesFamily)
 			if (queueFamily->isTransferFamily())
 				return queueFamily;
+
+		return nullptr;
 	}
 
 	QueueFamily* QueueManager::getComputeQueueFamily()
@@ -56,6 +60,8 @@ namespace VkBootstrap
 		for (QueueFamily* queueFamily : queuesFamily)
 			if (queueFamily->isComputeFamily())
 				return queueFamily;
+
+		return nullptr;
 	}
 
 	QueueFamily* QueueManager::getSparseBindingFamily()
@@ -63,6 +69,8 @@ namespace VkBootstrap
 		for (QueueFamily* queueFamily : queuesFamily)
 			if (queueFamily->isSparseBindingFamily())
 				return queueFamily;
+
+		return nullptr;
 	}
 
 	QueueFamily* QueueManager::getPresentationQueueFamily()
@@ -70,6 +78,8 @@ namespace VkBootstrap
 		for (QueueFamily* queueFamily : queuesFamily)
 			if (queueFamily->hasPresentationSupport())
 				return queueFamily;
+
+		return nullptr;
 	}
 
 	std::vector<VkQueueFamilyProperties> QueueManager::getQueueFamilies(const VkPhysicalDevice &device)

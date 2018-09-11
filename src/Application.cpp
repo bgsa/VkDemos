@@ -1,5 +1,21 @@
 #include "Application.h"
 
+#include "MemoryBuffer.h"
+#include "OpenML.h"
+#include <array>
+
+struct Vertex {
+	OpenML::Vec2f pos;
+	OpenML::Vec3f color;
+};
+
+const std::vector<Vertex> vertices = {
+	{ {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+	{ {0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}},
+	{ {-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+};
+
+
 namespace VkBootstrap
 {
 	const int MAX_FRAMEBUFFER = 2;
@@ -9,12 +25,12 @@ namespace VkBootstrap
 		setupWindow();
 		setupVulkan();
 		setupSurface();
-		setupDevice();				
+		setupDevice();
 
 		start();
 	}
 
-	void Application::stop() 
+	void Application::stop()
 	{
 		isRunning = false;
 		vkDeviceWaitIdle(device->logicalDevice);
@@ -32,6 +48,32 @@ namespace VkBootstrap
 
 		isRunning = true;
 
+		//TODO: remover
+		MemoryBuffer* memoryBuffer = new MemoryBuffer(device, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(vertices[0]) * vertices.size(), (void*)vertices.data());
+
+		VkVertexInputBindingDescription bindingDescription = {};
+		bindingDescription.binding = 0;
+		bindingDescription.stride = sizeof(Vertex);
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].offset = offsetof(Vertex, pos);
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		vertexInputInfo.vertexBindingDescriptionCount = 1;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+		
+
 		while (isRunning)
 		{
 			window->update(0);
@@ -48,12 +90,22 @@ namespace VkBootstrap
 
 			if (operationResult != VK_SUCCESS)
 				throw std::runtime_error("failed to acquire image: " + VkHelper::getVkResultDescription(operationResult));
+			
+
+			graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport, &vertexInputInfo);
+
 
 			Command *command = commandManager->createCommand(graphicPipeline, swapChain);
 			command->begin(imageIndex);
 
-			for (VkCommandBuffer commandBuffer : command->commandBuffers)
-				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+			for (VkCommandBuffer commandBuffer : command->commandBuffers) 
+			{
+				VkBuffer vertexBuffers[] = { memoryBuffer->getBuffer() };
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+				vkCmdDraw(commandBuffer, (uint32_t) vertices.size(), 1, 0, 0);
+			}
 
 			command->end();
 
@@ -83,7 +135,7 @@ namespace VkBootstrap
 
 			operationResult = vkQueuePresentKHR(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue, &presentInfo);
 
-			if (operationResult != VK_SUCCESS) 
+			if (operationResult != VK_SUCCESS)
 			{
 				if (operationResult == VK_ERROR_OUT_OF_DATE_KHR)
 				{
@@ -100,21 +152,24 @@ namespace VkBootstrap
 			vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
 
 			commandManager->releaseCommands();
+			delete graphicPipeline;
+			graphicPipeline = nullptr;
 		}
 
 		vkDeviceWaitIdle(device->logicalDevice);
 
 		cleanUpSwapChain();
+
+		//TODO: remover
+		delete memoryBuffer;
 	}
 
-	void Application::setupSwapChain() 
+	void Application::setupSwapChain()
 	{
 		swapChain = SwapChain::createSwapChain(device, surface, window);
 		setupSyncObjects();
 
 		shader = Shader::createShader(device, "resources/shaders/vert.spv", "resources/shaders/frag.spv");
-
-		graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport);
 
 		CommandManager::init(device);
 		commandManager = CommandManager::getInstance();
@@ -256,10 +311,10 @@ namespace VkBootstrap
 		viewport->setSize(width, height);
 	}
 
-	void Application::cleanUpSwapChain() 
+	void Application::cleanUpSwapChain()
 	{
 		vkDeviceWaitIdle(device->logicalDevice);
-		
+
 		if (commandManager != nullptr)
 		{
 			delete commandManager;
@@ -272,7 +327,7 @@ namespace VkBootstrap
 			graphicPipeline = nullptr;
 		}
 
-		if (shader != nullptr) 
+		if (shader != nullptr)
 		{
 			delete shader;
 			shader = nullptr;

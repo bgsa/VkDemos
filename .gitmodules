@@ -1,0 +1,3 @@
+[submodule "dependencies/openml"]
+	path = dependencies/openml
+	url = https://github.com/bgsa/openml.git

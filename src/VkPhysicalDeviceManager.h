@@ -20,6 +20,7 @@ public:
   VkPhysicalDevice findSuitableGraphicalDevice();
   VkPhysicalDevice findSuitableGraphicalDevice(std::vector<const char *> requiredExtensions);
   VkPhysicalDevice findSuitableGraphicalDevice(std::vector<VkPhysicalDevice> devices, std::vector<const char *> requiredExtensions);
+  static VkPhysicalDeviceMemoryProperties getMemoryProperties(const VkPhysicalDevice &device);
   VkPhysicalDeviceProperties getProperties(const VkPhysicalDevice &device);
   VkPhysicalDeviceFeatures getFeatures(const VkPhysicalDevice &device);
   bool isGpuDevice(const VkPhysicalDevice &device);

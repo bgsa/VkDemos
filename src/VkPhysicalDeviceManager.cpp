@@ -161,6 +161,15 @@ void VkPhysicalDeviceManager::printSupportedDevices()
     }
 }
 
+VkPhysicalDeviceMemoryProperties VkPhysicalDeviceManager::getMemoryProperties(const VkPhysicalDevice &device) 
+{
+	VkPhysicalDeviceMemoryProperties memProperties;
+
+	vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
+
+	return memProperties;
+}
+
 VkPhysicalDeviceProperties VkPhysicalDeviceManager::getProperties(const VkPhysicalDevice &device)
 {
     VkPhysicalDeviceProperties deviceProperties;
