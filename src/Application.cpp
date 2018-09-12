@@ -1,20 +1,6 @@
 #include "Application.h"
 
-#include "MemoryBuffer.h"
-#include "OpenML.h"
-#include <array>
-
-struct Vertex {
-	OpenML::Vec2f pos;
-	OpenML::Vec3f color;
-};
-
-const std::vector<Vertex> vertices = {
-	{ {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-	{ {0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}},
-	{ {-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-};
-
+#include "RendererObject.h"
 
 namespace VkBootstrap
 {
@@ -47,33 +33,13 @@ namespace VkBootstrap
 		uint64_t semaphoresTimeout = std::numeric_limits<uint64_t>::max();
 
 		isRunning = true;
-
-		//TODO: remover
-		MemoryBuffer* memoryBuffer = new MemoryBuffer(device, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(vertices[0]) * vertices.size(), (void*)vertices.data());
-
-		VkVertexInputBindingDescription bindingDescription = {};
-		bindingDescription.binding = 0;
-		bindingDescription.stride = sizeof(Vertex);
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(Vertex, pos);
-		attributeDescriptions[1].binding = 0;
-		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexBindingDescriptionCount = 1;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 		
+		//TODO: remover
+		RendererObject *triangle = new RendererObject(device);
 
+		std::vector<VkPipelineVertexInputStateCreateInfo> vertexInputs;
+		vertexInputs.push_back(triangle->vertexInputInfo);
+		
 		while (isRunning)
 		{
 			window->update(0);
@@ -91,21 +57,15 @@ namespace VkBootstrap
 			if (operationResult != VK_SUCCESS)
 				throw std::runtime_error("failed to acquire image: " + VkHelper::getVkResultDescription(operationResult));
 			
-
-			graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport, &vertexInputInfo);
+					   		
+			graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport, vertexInputs.data());
 
 
 			Command *command = commandManager->createCommand(graphicPipeline, swapChain);
 			command->begin(imageIndex);
 
 			for (VkCommandBuffer commandBuffer : command->commandBuffers) 
-			{
-				VkBuffer vertexBuffers[] = { memoryBuffer->getBuffer() };
-				VkDeviceSize offsets[] = { 0 };
-				vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-				vkCmdDraw(commandBuffer, (uint32_t) vertices.size(), 1, 0, 0);
-			}
+				triangle->render(commandBuffer);
 
 			command->end();
 
@@ -152,6 +112,7 @@ namespace VkBootstrap
 			vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
 
 			commandManager->releaseCommands();
+
 			delete graphicPipeline;
 			graphicPipeline = nullptr;
 		}
@@ -161,7 +122,7 @@ namespace VkBootstrap
 		cleanUpSwapChain();
 
 		//TODO: remover
-		delete memoryBuffer;
+		delete triangle;
 	}
 
 	void Application::setupSwapChain()
