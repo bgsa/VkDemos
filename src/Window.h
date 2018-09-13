@@ -23,6 +23,7 @@ public:
   void waitEvents();
 
   Size getSize();
+  bool isVisible();
 
   std::vector<const char *> getRequiredExtensions();
   void printRequiredExtensions();

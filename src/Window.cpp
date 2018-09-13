@@ -60,10 +60,19 @@ namespace VkBootstrap
 	Size Window::getSize()
 	{
 		int width, height;
-		//glfwGetWindowSize(windowHandler, &width, &height);
 		glfwGetFramebufferSize(windowHandler, &width, &height);
 
 		return Size{ width, height };
+	}
+
+	bool Window::isVisible() 
+	{
+		Size size = getSize();
+		
+		if (size.width == 0 || size.height == 0)
+			return false;
+
+		return true;
 	}
 
 	void Window::update(long long elapsedTime)

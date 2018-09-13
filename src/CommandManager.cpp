@@ -4,6 +4,21 @@ namespace VkBootstrap
 {
 	static CommandManager *commandManager = nullptr;
 
+	size_t CommandManager::getCommandsCount() 
+	{
+		return commands.size();
+	}
+
+	VkCommandBuffer* CommandManager::getCommandBuffers()
+	{	
+		VkCommandBuffer* commandsTemp = new VkCommandBuffer[getCommandsCount()];
+
+		for (size_t i = 0; i < getCommandsCount(); i++)
+			commandsTemp[i] = commands[i]->commandBuffer;
+
+		return commandsTemp;
+	}
+
 	void CommandManager::init(const Device *device)
 	{
 		commandManager = new CommandManager(device);

@@ -5,6 +5,9 @@
 #include <array>
 #include "MemoryBuffer.h"
 #include "OpenML.h"
+#include "Shader.h"
+#include "GraphicPipeline.h"
+#include "CommandManager.h"
 
 namespace VkBootstrap
 {
@@ -23,16 +26,16 @@ namespace VkBootstrap
 			{ {-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 		};
 
+		Shader *shader = nullptr;
 		MemoryBuffer* memoryBuffer = nullptr;
-		VkVertexInputBindingDescription bindingDescription = {};
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
-		
-	public:
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {  };
-		 
-		RendererObject(Device* device);
+		GraphicPipeline *graphicPipeline = nullptr;
 
-		void render(const VkCommandBuffer& commandBuffer);
+		void createPipeline(Device* device, SwapChain* swapChain, Viewport* viewport);
+				
+	public:
+		RendererObject(Device* device, SwapChain* swapChain, Viewport* viewport);
+
+		void render(CommandManager* commandManager, SwapChain* swapChain, uint32_t imageIndex, Viewport* viewport);
 
 		~RendererObject();
 	};

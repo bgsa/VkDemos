@@ -52,6 +52,18 @@ namespace VkBootstrap
 		viewportState = viewport->getViewportState();
 		rasterizers = Rasterizer::getState();
 
+		std::vector<VkDynamicState> dynamicStates = { 
+			VK_DYNAMIC_STATE_VIEWPORT,
+			VK_DYNAMIC_STATE_SCISSOR
+		};
+
+		VkPipelineDynamicStateCreateInfo dynamicStateInfo = {};
+		dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamicStateInfo.pNext = nullptr;
+		dynamicStateInfo.flags = 0;
+		dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+		dynamicStateInfo.pDynamicStates = dynamicStates.data();
+
 		//create graphic pipeline
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -63,7 +75,7 @@ namespace VkBootstrap
 		pipelineInfo.pMultisampleState = &multisampling;
 		pipelineInfo.pDepthStencilState = nullptr; // Optional
 		pipelineInfo.pColorBlendState = &colorBlending;
-		pipelineInfo.pDynamicState = nullptr; // Optional
+		pipelineInfo.pDynamicState = &dynamicStateInfo;
 		pipelineInfo.layout = pipelineLayout;
 		pipelineInfo.renderPass = swapChain->renderPass;
 		pipelineInfo.subpass = 0;
@@ -80,7 +92,7 @@ namespace VkBootstrap
 
 	GraphicPipeline::~GraphicPipeline()
 	{
-		if (graphicPipeline != VK_NULL_HANDLE) 
+		if (graphicPipeline != VK_NULL_HANDLE)
 		{
 			vkDestroyPipeline(device, graphicPipeline, nullptr);
 			graphicPipeline = VK_NULL_HANDLE;

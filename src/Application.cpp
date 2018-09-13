@@ -30,91 +30,34 @@ namespace VkBootstrap
 		uint32_t imageIndex = 0;
 		uint32_t fenceCount = 1;
 		VkBool32 waitAllSemaphores = VK_TRUE;
-		uint64_t semaphoresTimeout = std::numeric_limits<uint64_t>::max();
 
 		isRunning = true;
 		
 		//TODO: remover
-		RendererObject *triangle = new RendererObject(device);
-
-		std::vector<VkPipelineVertexInputStateCreateInfo> vertexInputs;
-		vertexInputs.push_back(triangle->vertexInputInfo);
+		renderObject = new RendererObject(device, swapChain, viewport);
 		
 		while (isRunning)
 		{
 			window->update(0);
 
+			if (!window->isVisible()) 
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(250));
+				continue;
+			}
+
 			vkWaitForFences(device->logicalDevice, 1, &inFlightFences[currentFrame], waitAllSemaphores, semaphoresTimeout);
 			vkResetFences(device->logicalDevice, 1, &inFlightFences[currentFrame]);
 
-			VkSwapchainKHR swapChains[] = { swapChain->vulkanSwapChain };
-			VkSemaphore imageAvailableSemaphores[] = { imageAvailableSemaphore[currentFrame] };
-			VkSemaphore renderFinishedSemaphores[] = { renderFinishedSemaphore[currentFrame] };
-			VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+			imageIndex = getImageIndex(currentFrame);			
 
-			VkResult operationResult = vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, semaphoresTimeout, imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
+			renderObject->render(commandManager, swapChain, imageIndex, viewport);
 
-			if (operationResult != VK_SUCCESS)
-				throw std::runtime_error("failed to acquire image: " + VkHelper::getVkResultDescription(operationResult));
-			
-					   		
-			graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport, vertexInputs.data());
-
-
-			Command *command = commandManager->createCommand(graphicPipeline, swapChain);
-			command->begin(imageIndex);
-
-			for (VkCommandBuffer commandBuffer : command->commandBuffers) 
-				triangle->render(commandBuffer);
-
-			command->end();
-
-			VkSubmitInfo submitInfo = {};
-			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			submitInfo.pWaitDstStageMask = waitStages;
-			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = imageAvailableSemaphores;
-			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = renderFinishedSemaphores;
-			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &command->commandBuffers[0];
-
-			operationResult = vkQueueSubmit(device->queueManager->getGraphicQueueFamily()->getQueues()[0]->queue, 1, &submitInfo, inFlightFences[currentFrame]);
-
-			if (operationResult != VK_SUCCESS)
-				throw std::runtime_error("failed to submit draw command buffer: " + VkHelper::getVkResultDescription(operationResult));
-
-			VkPresentInfoKHR presentInfo = {};
-			presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-			presentInfo.waitSemaphoreCount = 1;
-			presentInfo.pWaitSemaphores = renderFinishedSemaphores;
-			presentInfo.swapchainCount = 1;
-			presentInfo.pSwapchains = swapChains;
-			presentInfo.pImageIndices = &imageIndex;
-			presentInfo.pResults = nullptr; // Optional
-
-			operationResult = vkQueuePresentKHR(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue, &presentInfo);
-
-			if (operationResult != VK_SUCCESS)
-			{
-				if (operationResult == VK_ERROR_OUT_OF_DATE_KHR)
-				{
-					cleanUpSwapChain();
-					setupSwapChain();
-					continue;
-				}
-
-				throw std::runtime_error("failed to present command buffer: " + VkHelper::getVkResultDescription(operationResult));
-			}
+			swapBuffer(imageIndex, currentFrame);
 
 			currentFrame = (currentFrame + 1) % MAX_FRAMEBUFFER;
 
-			vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
-
 			commandManager->releaseCommands();
-
-			delete graphicPipeline;
-			graphicPipeline = nullptr;
 		}
 
 		vkDeviceWaitIdle(device->logicalDevice);
@@ -122,16 +65,77 @@ namespace VkBootstrap
 		cleanUpSwapChain();
 
 		//TODO: remover
-		delete triangle;
+		delete renderObject;
+	}
+
+	uint32_t Application::getImageIndex(size_t currentFrame) 
+	{
+		uint32_t imageIndex;
+
+		VkResult operationResult = vkAcquireNextImageKHR(device->logicalDevice, swapChain->vulkanSwapChain, semaphoresTimeout, imageAvailableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+		if (operationResult != VK_SUCCESS)
+			throw std::runtime_error("failed to acquire image: " + VkHelper::getVkResultDescription(operationResult));
+
+		return imageIndex;
+	}
+
+	void Application::swapBuffer(uint32_t imageIndex, size_t currentFrame) 
+	{
+		VkSwapchainKHR swapChains[] = { swapChain->vulkanSwapChain };
+		VkSemaphore renderFinishedSemaphores[] = { renderFinishedSemaphore[currentFrame] };
+		VkSemaphore imageAvailableSemaphores[] = { imageAvailableSemaphore[currentFrame] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+		VkCommandBuffer* commandBuffers = commandManager->getCommandBuffers();
+
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = imageAvailableSemaphores;
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = renderFinishedSemaphores;
+		submitInfo.commandBufferCount = (uint32_t)commandManager->getCommandsCount();
+		submitInfo.pCommandBuffers = commandBuffers;
+
+		VkResult operationResult = vkQueueSubmit(device->queueManager->getGraphicQueueFamily()->getQueues()[0]->queue, 1, &submitInfo, inFlightFences[currentFrame]);
+
+		if (operationResult != VK_SUCCESS)
+			throw std::runtime_error("failed to submit draw command buffer: " + VkHelper::getVkResultDescription(operationResult));
+
+		delete commandBuffers;
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = renderFinishedSemaphores;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &imageIndex;
+		presentInfo.pResults = nullptr; // Optional
+
+		operationResult = vkQueuePresentKHR(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue, &presentInfo);
+
+		if (operationResult != VK_SUCCESS)
+		{
+			if (operationResult == VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				cleanUpSwapChain();
+				setupSwapChain();
+			}
+			else
+				throw std::runtime_error("failed to present command buffer: " + VkHelper::getVkResultDescription(operationResult));
+		}
+
+		vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
 	}
 
 	void Application::setupSwapChain()
 	{
 		swapChain = SwapChain::createSwapChain(device, surface, window);
 		setupSyncObjects();
-
-		shader = Shader::createShader(device, "resources/shaders/vert.spv", "resources/shaders/frag.spv");
-
+		
 		CommandManager::init(device);
 		commandManager = CommandManager::getInstance();
 	}
@@ -280,18 +284,6 @@ namespace VkBootstrap
 		{
 			delete commandManager;
 			commandManager = nullptr;
-		}
-
-		if (graphicPipeline != nullptr)
-		{
-			delete graphicPipeline;
-			graphicPipeline = nullptr;
-		}
-
-		if (shader != nullptr)
-		{
-			delete shader;
-			shader = nullptr;
 		}
 
 		if (swapChain != nullptr)

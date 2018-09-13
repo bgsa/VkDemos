@@ -8,12 +8,15 @@
 #include "VkPhysicalDeviceManager.h"
 #include "Device.h"
 #include "SwapChain.h"
-#include "Shader.h"
 #include "Viewport.h"
 #include "Rasterizer.hpp"
 #include "WindowInputDevice.h"
 #include "GraphicPipeline.h"
 #include "CommandManager.h"
+#include "RendererObject.h"
+
+#include <thread>
+#include <chrono>
 
 namespace VkBootstrap
 {
@@ -27,14 +30,16 @@ namespace VkBootstrap
 		Device *device = nullptr;
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
 		Viewport *viewport = nullptr;
-		SwapChain *swapChain = nullptr;
-		GraphicPipeline *graphicPipeline = nullptr;
+		SwapChain *swapChain = nullptr;		
 		CommandManager *commandManager = nullptr;
-		Shader *shader = nullptr;
-
+		
 		std::vector<VkSemaphore> imageAvailableSemaphore;
 		std::vector<VkSemaphore> renderFinishedSemaphore;
 		std::vector<VkFence> inFlightFences;
+
+		const uint64_t semaphoresTimeout = std::numeric_limits<uint64_t>::max();
+
+		RendererObject *renderObject = nullptr;
 
 		bool isRunning = true;
 
@@ -46,6 +51,9 @@ namespace VkBootstrap
 		void setupSyncObjects();
 		void setupDebugCallback();
 		void cleanUpSwapChain();
+
+		uint32_t getImageIndex(size_t currentFrame);
+		void swapBuffer(uint32_t imageIndex, size_t currentFrame);
 
 		void window_OnClose();
 		void window_OnResize(int width, int height);

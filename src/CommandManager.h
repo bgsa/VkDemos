@@ -13,12 +13,16 @@ namespace VkBootstrap
 	{
 	private:
 		VkDevice device = VK_NULL_HANDLE;
+		VkCommandPool commandPool = VK_NULL_HANDLE;
+
 		std::vector<Command*> commands;
 
 		CommandManager(const Device *device);
 		
 	public:
-		VkCommandPool commandPool = VK_NULL_HANDLE;
+
+		inline size_t getCommandsCount();
+		VkCommandBuffer* getCommandBuffers();
 
 		static void init(const Device *device);
 		Command *createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain);

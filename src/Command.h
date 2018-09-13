@@ -17,11 +17,11 @@ namespace VkBootstrap
 		GraphicPipeline *graphicPipeline = nullptr;
 
 	public:
-		std::vector<VkCommandBuffer> commandBuffers;
+		VkCommandBuffer commandBuffer;
 
 		Command(const VkDevice &device, SwapChain *swapChain, const VkCommandPool &commandPool, GraphicPipeline *graphicPipeline);
 
-		void begin(size_t frameBufferIndex);
+		void begin(size_t frameBufferIndex, Viewport* viewport);
 		void end();
 
 		~Command();
