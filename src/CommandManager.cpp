@@ -44,9 +44,19 @@ namespace VkBootstrap
 		return command;
 	}
 
+	CopyCommand *CommandManager::createCopyCommand()
+	{
+		CopyCommand *command = new CopyCommand(device, commandPool, transferQueue);
+
+		copyCommands.push_back(command);
+
+		return command;
+	}
+
 	CommandManager::CommandManager(const Device *device)
 	{
 		this->device = device->logicalDevice;
+		this->transferQueue = device->queueManager->getGraphicQueueFamily()->getQueues()[0]->queue;;
 	}
 
 	CommandManager *CommandManager::getInstance()
@@ -62,7 +72,11 @@ namespace VkBootstrap
 		for (Command* command : commands)
 			delete command;
 
+		for (CopyCommand* command : copyCommands)
+			delete command;
+		
 		commands.clear();
+		copyCommands.clear();
 	}
 
 	CommandManager::~CommandManager()

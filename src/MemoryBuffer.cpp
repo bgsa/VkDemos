@@ -3,26 +3,23 @@
 namespace VkBootstrap
 {
 
-	MemoryBuffer::MemoryBuffer(Device* device, VkBufferUsageFlags usage, VkDeviceSize bufferSize, void* buffer)
+	void MemoryBuffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 	{
-		this->device = device;
+		VkBufferCreateInfo bufferInfo = {}; 
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; 
+		bufferInfo.size = size; 
+		bufferInfo.usage = usage; 
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; 
 		
-		VkBufferCreateInfo bufferInfo = {};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = bufferSize;
-		bufferInfo.usage = usage;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		if (vkCreateBuffer(device->logicalDevice, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
-			throw std::runtime_error("failed to create vertex buffer!");
+		if (vkCreateBuffer(device->logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) 
+			throw std::runtime_error("failed to create buffer!"); 
 
 		VkMemoryRequirements memoryRequirements;
-		vkGetBufferMemoryRequirements(device->logicalDevice, vertexBuffer, &memoryRequirements);
-		
+		vkGetBufferMemoryRequirements(device->logicalDevice, buffer, &memoryRequirements);
+
 		//find memory type
 		VkPhysicalDeviceMemoryProperties memoryProperties = VkPhysicalDeviceManager::getMemoryProperties(device->physicalDevice);
-		VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-		int memoryTypeIndex = -1; 
+		int memoryTypeIndex = -1;
 		uint32_t typeFilter = memoryRequirements.memoryTypeBits;
 		for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++)
 			if ((typeFilter & (1 << i)) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
@@ -39,25 +36,53 @@ namespace VkBootstrap
 		allocInfo.allocationSize = memoryRequirements.size;
 		allocInfo.memoryTypeIndex = memoryTypeIndex;
 				
-		if (vkAllocateMemory(device->logicalDevice, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS)
-			throw std::runtime_error("failed to allocate vertex buffer memory!");
-
-		vkBindBufferMemory(device->logicalDevice, vertexBuffer, vertexBufferMemory, 0);
-
-		void* data;
-		vkMapMemory(device->logicalDevice, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-
-		memcpy(data, buffer, (size_t)bufferInfo.size);
-
-		vkUnmapMemory(device->logicalDevice, vertexBufferMemory);
+		if (vkAllocateMemory(device->logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+			throw std::runtime_error("failed to allocate buffer memory!");
+		
+		vkBindBufferMemory(device->logicalDevice, buffer, bufferMemory, 0);
 	}
 
-	VkBuffer MemoryBuffer::getBuffer() 
+	void MemoryBuffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) 
+	{
+		VkBufferCopy copyRegion = {};
+		copyRegion.srcOffset = 0;
+		copyRegion.dstOffset = 0;
+		copyRegion.size = size;
+
+		CopyCommand* copyCommand = CommandManager::getInstance()->createCopyCommand();
+		copyCommand->begin(size, 0, 0);
+		copyCommand->execute(srcBuffer, dstBuffer, 1, &copyRegion);
+		copyCommand->end();
+	}
+
+	MemoryBuffer::MemoryBuffer(Device* device, VkBufferUsageFlags usage, VkDeviceSize bufferSize, void* buffer)
+	{
+		this->device = device;
+
+		VkBuffer stagingBuffer; 
+		VkDeviceMemory stagingBufferMemory; 
+
+		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory); 
+		
+		void* data;
+		vkMapMemory(device->logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data); 
+		memcpy(data, buffer, (size_t)bufferSize); 
+		vkUnmapMemory(device->logicalDevice, stagingBufferMemory);
+
+		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory); 
+				
+		copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+						
+		vkDestroyBuffer(device->logicalDevice, stagingBuffer, nullptr);
+		vkFreeMemory(device->logicalDevice, stagingBufferMemory, nullptr);
+	}
+
+	VkBuffer MemoryBuffer::getBuffer()
 	{
 		return vertexBuffer;
 	}
 
-	MemoryBuffer::~MemoryBuffer() 
+	MemoryBuffer::~MemoryBuffer()
 	{
 		vkDestroyBuffer(device->logicalDevice, vertexBuffer, nullptr);
 		vkFreeMemory(device->logicalDevice, vertexBufferMemory, nullptr);
