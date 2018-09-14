@@ -6,9 +6,19 @@ namespace VkBootstrap
 	RendererObject::RendererObject(Device* device, SwapChain* swapChain, Viewport* viewport) 
 	{
 		shader = Shader::createShader(device, "resources/shaders/vert.spv", "resources/shaders/frag.spv");
+		
+		size_t vertexBufferSize = sizeof(vertices[0]) * vertices.size();
+		size_t indexBufferSize = sizeof(indices[0]) * indices.size();
+		size_t bufferSize = vertexBufferSize + indexBufferSize;
 
-		memoryBuffer = new MemoryBuffer(device, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(vertices[0]) * vertices.size(), (void*)vertices.data());
+		char *bufferData = (char*) malloc(bufferSize);
+		std::memcpy(bufferData, vertices.data(), vertexBufferSize);
+		std::memcpy(&bufferData[vertexBufferSize], indices.data(), indexBufferSize);
 
+		dataBuffer = new MemoryBuffer(device, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, bufferSize, bufferData);
+
+		delete[] bufferData;
+		
 		createPipeline(device, swapChain, viewport);
 	}
 
@@ -42,15 +52,17 @@ namespace VkBootstrap
 
 	void RendererObject::render(CommandManager* commandManager, SwapChain* swapChain, uint32_t imageIndex, Viewport* viewport)
 	{
-		VkBuffer vertexBuffers[] = { memoryBuffer->getBuffer() };
+		VkBuffer vertexBuffers[] = { dataBuffer->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
+		size_t vertexBufferSize = sizeof(vertices[0]) * vertices.size();
 
 		Command *command = commandManager->createCommand(graphicPipeline, swapChain);
 		command->begin(imageIndex, viewport);
 
 		vkCmdBindVertexBuffers(command->commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(command->commandBuffer, dataBuffer->getBuffer(), vertexBufferSize, VK_INDEX_TYPE_UINT16);
 
-		vkCmdDraw(command->commandBuffer, (uint32_t)vertices.size(), 1, 0, 0);
+		vkCmdDrawIndexed(command->commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 		command->end();
 	}
@@ -63,10 +75,10 @@ namespace VkBootstrap
 			shader = nullptr;
 		}
 
-		if (memoryBuffer != nullptr) 
+		if (dataBuffer != nullptr) 
 		{
-			delete memoryBuffer;
-			memoryBuffer = nullptr;
+			delete dataBuffer;
+			dataBuffer = nullptr;
 		}
 
 		if (graphicPipeline != nullptr)
