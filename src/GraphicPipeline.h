@@ -15,9 +15,7 @@ namespace VkBootstrap
 	private:
 		VkDevice device = VK_NULL_HANDLE;
 		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-		VkPipelineShaderStageCreateInfo* shaderInfo = nullptr;
 		VkPipelineViewportStateCreateInfo* viewportState = nullptr;
-		VkPipelineRasterizationStateCreateInfo *rasterizers = nullptr;
 
 	public:
 		VkPipeline graphicPipeline = VK_NULL_HANDLE;

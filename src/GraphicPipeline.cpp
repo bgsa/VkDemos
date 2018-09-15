@@ -48,9 +48,7 @@ namespace VkBootstrap
 		if (operationResult != VK_SUCCESS)
 			throw std::runtime_error("failed to create pipeline layout: " + VkHelper::getVkResultDescription(operationResult));
 
-		shaderInfo = shader->getPipelinesShaderStageInfo();
 		viewportState = viewport->getViewportState();
-		rasterizers = Rasterizer::getState();
 
 		std::vector<VkDynamicState> dynamicStates = { 
 			VK_DYNAMIC_STATE_VIEWPORT,
@@ -68,10 +66,10 @@ namespace VkBootstrap
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineInfo.stageCount = 2;
-		pipelineInfo.pStages = shaderInfo;
+		pipelineInfo.pStages = shader->getPipelinesShaderStageInfo();
 		pipelineInfo.pVertexInputState = vertexInput;
 		pipelineInfo.pInputAssemblyState = &inputAssembly;
-		pipelineInfo.pRasterizationState = rasterizers;
+		pipelineInfo.pRasterizationState = Rasterizer::getState();
 		pipelineInfo.pMultisampleState = &multisampling;
 		pipelineInfo.pDepthStencilState = nullptr; // Optional
 		pipelineInfo.pColorBlendState = &colorBlending;
@@ -104,9 +102,8 @@ namespace VkBootstrap
 			pipelineLayout = VK_NULL_HANDLE;
 		}
 
-		delete shaderInfo;
 		delete viewportState;
-		delete rasterizers;
+		viewportState = nullptr;
 	}
 
 }

@@ -51,9 +51,12 @@ VkPipelineShaderStageCreateInfo Shader::getFragmentPipelineShaderStageInfo()
 
 VkPipelineShaderStageCreateInfo *Shader::getPipelinesShaderStageInfo()
 {
-    VkPipelineShaderStageCreateInfo *shaderStages = new VkPipelineShaderStageCreateInfo[2];
-    shaderStages[0] = getVertexPipelineShaderStageInfo();
-    shaderStages[1] = getFragmentPipelineShaderStageInfo();
+	if (shaderStages == nullptr)
+	{
+		shaderStages = new VkPipelineShaderStageCreateInfo[2];
+		shaderStages[0] = getVertexPipelineShaderStageInfo();
+		shaderStages[1] = getFragmentPipelineShaderStageInfo();
+	}
 
     return shaderStages;
 }
