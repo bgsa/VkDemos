@@ -39,6 +39,7 @@ namespace VkBootstrap
 		while (isRunning)
 		{
 			window->update(0);
+			renderObject->update(0);
 
 			if (!window->isVisible()) 
 			{
@@ -55,9 +56,9 @@ namespace VkBootstrap
 
 			swapBuffer(imageIndex, currentFrame);
 
-			currentFrame = (currentFrame + 1) % MAX_FRAMEBUFFER;
-
 			commandManager->releaseCommands();
+
+			currentFrame = (currentFrame + 1) % MAX_FRAMEBUFFER;
 		}
 
 		vkDeviceWaitIdle(device->logicalDevice);

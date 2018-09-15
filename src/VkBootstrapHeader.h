@@ -10,11 +10,13 @@
 
 	#include <Windows.h>
 #endif
+
 #ifdef LINUX
-//#define VK_USE_PLATFORM_XLIB_KHR
+	#define VK_USE_PLATFORM_XLIB_KHR
 #endif
+
 #ifdef ANDROID
-#define VK_USE_PLATFORM_ANDROID_KHR
+	#define VK_USE_PLATFORM_ANDROID_KHR
 #endif
 
 #include <limits>
@@ -30,6 +32,6 @@
 #include "SetHelper.hpp"
 #include "VkHelper.hpp"
 
-//using namespace std;
+#include <OpenML.h>
 
 #endif

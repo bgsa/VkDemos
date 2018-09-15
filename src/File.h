@@ -28,7 +28,7 @@ class File
     size_t length = 0;
     char *content = nullptr;
 
-	static inline char getFileSeparator();
+	static char getFileSeparator();
 	static std::string getCurrentDir();
 	static std::string getAbsolutePath(std::string relativePath);
     static File *readFile(const std::string &filename);

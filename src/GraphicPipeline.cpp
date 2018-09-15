@@ -3,6 +3,70 @@
 namespace VkBootstrap
 {
 
+	void GraphicPipeline::createDescriptorPool(const Device* device) 
+	{
+		VkDescriptorPoolSize poolSize = {};
+		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = 1;
+
+		VkDescriptorPoolCreateInfo poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = 1;
+
+		if (vkCreateDescriptorPool(device->logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+			throw std::runtime_error("failed to create descriptor pool!");
+	}
+
+	void GraphicPipeline::createDescriptorSetLayout(const Device* device)
+	{
+		VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+		uboLayoutBinding.binding = 0;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = 1;
+		layoutInfo.pBindings = &uboLayoutBinding;
+
+		if (vkCreateDescriptorSetLayout(device->logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+			throw std::runtime_error("failed to create descriptor set layout!");
+	}
+
+	void GraphicPipeline::createDescriptorSets(const Device* device)
+	{
+		descriptorSets.resize(1);
+		std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout);
+
+		VkDescriptorSetAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = descriptorPool;
+		allocInfo.descriptorSetCount = 1;
+		allocInfo.pSetLayouts = layouts.data();
+
+		if (vkAllocateDescriptorSets(device->logicalDevice, &allocInfo, &descriptorSets[0]) != VK_SUCCESS)
+			throw std::runtime_error("failed to allocate descriptor sets!");
+	}
+
+	void GraphicPipeline::createPipelineLayout(const Device* device)
+	{
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = 1;
+		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+		pipelineLayoutInfo.pushConstantRangeCount = 0;
+		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+		VkResult operationResult = vkCreatePipelineLayout(device->logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout);
+
+		if (operationResult != VK_SUCCESS)
+			throw std::runtime_error("failed to create pipeline layout: " + VkHelper::getVkResultDescription(operationResult));
+	}
+
 	GraphicPipeline::GraphicPipeline(const Device *device, Shader *shader, SwapChain *swapChain, Viewport *viewport, VkPipelineVertexInputStateCreateInfo* vertexInput)
 	{
 		this->device = device->logicalDevice;
@@ -36,21 +100,15 @@ namespace VkBootstrap
 		colorBlending.blendConstants[2] = 0.0f; // Optional
 		colorBlending.blendConstants[3] = 0.0f; // Optional
 
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;            // Optional
-		pipelineLayoutInfo.pSetLayouts = nullptr;         // Optional
-		pipelineLayoutInfo.pushConstantRangeCount = 0;    // Optional
-		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+		createDescriptorPool(device);
+		createDescriptorSetLayout(device);						
+		createDescriptorSets(device);
 
-		VkResult operationResult = vkCreatePipelineLayout(device->logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout);
-
-		if (operationResult != VK_SUCCESS)
-			throw std::runtime_error("failed to create pipeline layout: " + VkHelper::getVkResultDescription(operationResult));
+		createPipelineLayout(device);
 
 		viewportState = viewport->getViewportState();
 
-		std::vector<VkDynamicState> dynamicStates = { 
+		std::vector<VkDynamicState> dynamicStates = {
 			VK_DYNAMIC_STATE_VIEWPORT,
 			VK_DYNAMIC_STATE_SCISSOR
 		};
@@ -82,7 +140,7 @@ namespace VkBootstrap
 		pipelineInfo.pViewportState = viewportState;
 		pipelineInfo.pTessellationState = nullptr;
 
-		operationResult = vkCreateGraphicsPipelines(device->logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicPipeline);
+		VkResult operationResult = vkCreateGraphicsPipelines(device->logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicPipeline);
 
 		if (operationResult != VK_SUCCESS)
 			throw std::runtime_error("failed to create graphics pipeline!");
@@ -90,6 +148,18 @@ namespace VkBootstrap
 
 	GraphicPipeline::~GraphicPipeline()
 	{
+		if (descriptorPool != VK_NULL_HANDLE)
+		{
+			vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+			descriptorPool = VK_NULL_HANDLE;
+		}
+
+		if (descriptorSetLayout != VK_NULL_HANDLE)
+		{
+			vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+			descriptorSetLayout = VK_NULL_HANDLE;
+		}
+
 		if (graphicPipeline != VK_NULL_HANDLE)
 		{
 			vkDestroyPipeline(device, graphicPipeline, nullptr);

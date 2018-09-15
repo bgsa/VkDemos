@@ -3,7 +3,7 @@
 namespace VkBootstrap
 {
 
-	inline char getFileSeparator() 
+	inline char File::getFileSeparator() 
 	{
 		return FILE_SEPARATOR;
 	}
