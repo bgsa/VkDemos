@@ -5,11 +5,18 @@ namespace VkBootstrap
 
 	void MemoryBuffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 	{
+		uint32_t queuesFamily[2] = {
+			device->queueManager->getGraphicQueueFamily()->getIndex(),
+			device->queueManager->getTransferQueueFamily()->getIndex()
+		};
+
 		VkBufferCreateInfo bufferInfo = {}; 
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; 
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;  
 		bufferInfo.size = size; 
 		bufferInfo.usage = usage; 
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; 
+		bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+		bufferInfo.queueFamilyIndexCount = 2;
+		bufferInfo.pQueueFamilyIndices = queuesFamily;
 		
 		if (vkCreateBuffer(device->logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) 
 			throw std::runtime_error("failed to create buffer!"); 

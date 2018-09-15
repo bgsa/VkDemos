@@ -42,7 +42,6 @@ namespace VkBootstrap
 
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.queueCreateInfoCount = 1;
 		createInfo.pEnabledFeatures = &deviceFeaturesRequired;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
 		createInfo.pQueueCreateInfos = queueInfos.data();

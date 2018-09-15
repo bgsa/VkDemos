@@ -48,11 +48,24 @@ namespace VkBootstrap
 
 	QueueFamily* QueueManager::getTransferQueueFamily()
 	{
-		for (QueueFamily* queueFamily : queuesFamily)
-			if (queueFamily->isTransferFamily())
-				return queueFamily;
+		QueueFamily* transferQueue = nullptr;
 
-		return nullptr;
+		for (QueueFamily* queueFamily : queuesFamily)
+			if (queueFamily->isTransferFamily() && !queueFamily->isGraphicFamily()) 
+			{
+				transferQueue = queueFamily;
+				break;
+			}
+
+		if (transferQueue == nullptr)
+			for (QueueFamily* queueFamily : queuesFamily)
+				if (queueFamily->isTransferFamily() && !queueFamily->isGraphicFamily()) 
+				{
+					transferQueue = queueFamily;
+					break;
+				}
+
+		return transferQueue;
 	}
 
 	QueueFamily* QueueManager::getComputeQueueFamily()

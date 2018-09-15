@@ -39,13 +39,28 @@ namespace VkBootstrap
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		
+		uint32_t* queuesFamily = nullptr;
 
-		if (device->queueManager->getGraphicQueueFamily()->getIndex() != device->queueManager->getPresentationQueueFamily()->getIndex())
+		std::set<uint32_t> queueFamilySet = {
+			device->queueManager->getGraphicQueueFamily()->getIndex(),
+			device->queueManager->getPresentationQueueFamily()->getIndex(),
+			device->queueManager->getTransferQueueFamily()->getIndex()
+		};
+
+		if (queueFamilySet.size() > 1) 
 		{
-			uint32_t queuesFamily[2] = { device->queueManager->getGraphicQueueFamily()->getIndex(), device->queueManager->getPresentationQueueFamily()->getQueues()[0]->index };
+			queuesFamily = new uint32_t[queueFamilySet.size()];
 
+			size_t counter = 0;
+			for (uint32_t index : queueFamilySet) 
+			{
+				queuesFamily[counter] = index;
+				counter++;
+			}
+			
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = 2;
+			createInfo.queueFamilyIndexCount = (uint32_t) queueFamilySet.size();
 			createInfo.pQueueFamilyIndices = queuesFamily;
 		}
 
@@ -53,6 +68,7 @@ namespace VkBootstrap
 		if (result != VK_SUCCESS)
 			throw std::runtime_error("failed to create swap chain: " + VkHelper::getVkResultDescription(result));
 
+		delete queuesFamily;
 		delete swapChainProperties;
 
 		result = vkGetSwapchainImagesKHR(device->logicalDevice, swapChain->vulkanSwapChain, &numberOfImage, nullptr);

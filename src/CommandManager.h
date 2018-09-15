@@ -15,6 +15,7 @@ namespace VkBootstrap
 	private:
 		VkDevice device = VK_NULL_HANDLE;
 		VkCommandPool commandPool = VK_NULL_HANDLE;
+		VkCommandPool copyCommandPool = VK_NULL_HANDLE;
 		VkQueue transferQueue = VK_NULL_HANDLE;
 
 		std::vector<Command*> commands;

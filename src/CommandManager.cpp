@@ -25,14 +25,24 @@ namespace VkBootstrap
 
 		VkCommandPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		poolInfo.queueFamilyIndex = device->queueManager->getGraphicQueueFamily()->getIndex();
-		//poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; //commands can be reused. Reset is explicit
+		poolInfo.queueFamilyIndex = device->queueManager->getGraphicQueueFamily()->getIndex();		
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+		//poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; //commands can be reused. Reset is explicit
 
 		VkResult operationResult = vkCreateCommandPool(device->logicalDevice, &poolInfo, nullptr, &commandManager->commandPool);
 
 		if (operationResult != VK_SUCCESS)
 			throw std::runtime_error("failed to create command pool!");
+
+		poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = device->queueManager->getTransferQueueFamily()->getIndex();
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+
+		operationResult = vkCreateCommandPool(device->logicalDevice, &poolInfo, nullptr, &commandManager->copyCommandPool);
+
+		if (operationResult != VK_SUCCESS)
+			throw std::runtime_error("failed to create copy command pool!");
 	}
 
 	Command *CommandManager::createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain)
@@ -46,7 +56,7 @@ namespace VkBootstrap
 
 	CopyCommand *CommandManager::createCopyCommand()
 	{
-		CopyCommand *command = new CopyCommand(device, commandPool, transferQueue);
+		CopyCommand *command = new CopyCommand(device, copyCommandPool, transferQueue);
 
 		copyCommands.push_back(command);
 
@@ -56,7 +66,7 @@ namespace VkBootstrap
 	CommandManager::CommandManager(const Device *device)
 	{
 		this->device = device->logicalDevice;
-		this->transferQueue = device->queueManager->getGraphicQueueFamily()->getQueues()[0]->queue;;
+		this->transferQueue = device->queueManager->getTransferQueueFamily()->getQueues()[0]->queue;
 	}
 
 	CommandManager *CommandManager::getInstance()
@@ -83,8 +93,17 @@ namespace VkBootstrap
 	{
 		releaseCommands();
 
-		vkDestroyCommandPool(device, commandPool, nullptr);
-		commandPool = VK_NULL_HANDLE;
+		if (copyCommandPool != VK_NULL_HANDLE) 
+		{
+			vkDestroyCommandPool(device, copyCommandPool, nullptr);
+			copyCommandPool = VK_NULL_HANDLE;
+		}
+
+		if (commandPool != VK_NULL_HANDLE)
+		{
+			vkDestroyCommandPool(device, commandPool, nullptr);
+			commandPool = VK_NULL_HANDLE;
+		}
 	}
 
 }
