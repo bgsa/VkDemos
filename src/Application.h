@@ -14,6 +14,7 @@
 #include "GraphicPipeline.h"
 #include "CommandManager.h"
 #include "RendererObject.h"
+#include "Timer.h"
 
 #include <thread>
 #include <chrono>
@@ -40,6 +41,8 @@ namespace VkBootstrap
 		const uint64_t semaphoresTimeout = std::numeric_limits<uint64_t>::max();
 
 		RendererObject *renderObject = nullptr;
+
+		Timer timer;
 
 		bool isRunning = true;
 

@@ -24,6 +24,8 @@ namespace VkBootstrap
 
 	void Application::start()
 	{
+		timer.start();
+
 		setupSwapChain();
 
 		size_t currentFrame = 0;
@@ -38,8 +40,10 @@ namespace VkBootstrap
 		
 		while (isRunning)
 		{
-			window->update(0);
-			renderObject->update(0);
+			long long elapsedTime = timer.getElapsedTime();
+
+			window->update(elapsedTime);
+			renderObject->update(elapsedTime);
 
 			if (!window->isVisible()) 
 			{
@@ -57,6 +61,8 @@ namespace VkBootstrap
 			swapBuffer(imageIndex, currentFrame);
 
 			commandManager->releaseCommands();
+
+			timer.update();
 
 			currentFrame = (currentFrame + 1) % MAX_FRAMEBUFFER;
 		}
