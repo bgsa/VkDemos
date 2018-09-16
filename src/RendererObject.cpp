@@ -3,30 +3,10 @@
 namespace VkBootstrap
 {
 		
-	RendererObject::RendererObject(Device* device, SwapChain* swapChain, Viewport* viewport) 
+	RendererObject::RendererObject(Device* device, SwapChain* swapChain, Viewport* viewport, VkDescriptorSetLayout* descriptorSetLayout, const std::vector<VkDescriptorSet>& descriptorSets)
 	{
 		this->device = device;
 		this->viewport = viewport;
-
-		float aspectRatio = viewport->getAspectRatio();
-		Vec3f cameraPosition = { 0.0f, 12.0f, -17.0f };
-		Vec3f cameraTarget = { 0.0f, 3.0f, 0.0f };
-		camera.init(cameraPosition, cameraTarget);
-		camera.setPerspective(90.0f, aspectRatio, 1.0f, 1000.0f);
-	   
-		//ubo.projectionMatrix = camera.getProjectionMatrix().clone();
-		ubo.projectionMatrix = camera.getHUDProjectionMatrix((float)viewport->getWidth(), (float)viewport->getHeight());
-		ubo.viewMatrix = camera.getViewMatrix().clone();
-		ubo.modelMatrix = {
-			300.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 300.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			300.0f, 300.0f, 0.0f, 1.0f };
-		
-		//ubo.projectionMatrix[5] *= -1;
-		
-		uniformBuffer = new MemoryBuffer(device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(UniformBufferObject), &ubo);
-
 
 		shader = Shader::createShader(device, "resources/shaders/vert.spv", "resources/shaders/frag.spv");
 		
@@ -42,44 +22,14 @@ namespace VkBootstrap
 
 		delete[] bufferData;
 
-		createPipeline(device, swapChain, viewport);
+		createPipeline(device, swapChain, descriptorSetLayout, descriptorSets);
 	}
 
 	void RendererObject::update(long long elapsedTime) 
 	{
-		camera.update(elapsedTime);
-
-		float aspectRatio = viewport->getAspectRatio();
-		camera.setPerspective(90.0f, aspectRatio, 1.0f, 1000.0f);
-
-		ubo.projectionMatrix = camera.getProjectionMatrix().clone();
-		ubo.viewMatrix = camera.getViewMatrix().clone();
-		ubo.modelMatrix = { 
-			1.0f, 0.0f, 0.0f, 0.0f, 
-			0.0f, 1.0f, 0.0f, 0.0f, 
-			0.0f, 0.0f, 1.0f, 0.0f, 
-			0.0f, 0.0f, 0.0f, 1.0f };
-
-		VkDescriptorBufferInfo bufferInfo = {};
-		bufferInfo.buffer = uniformBuffer->getBuffer();
-		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(UniformBufferObject);
-		
-		VkWriteDescriptorSet descriptorWrite = {};
-		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite.dstSet = graphicPipeline->descriptorSets[0];
-		descriptorWrite.dstBinding = 0;
-		descriptorWrite.dstArrayElement = 0;
-		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorWrite.descriptorCount = 1;
-		descriptorWrite.pBufferInfo = &bufferInfo;
-		descriptorWrite.pImageInfo = nullptr; // Optional 
-		descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-		vkUpdateDescriptorSets(device->logicalDevice, 1, &descriptorWrite, 0, nullptr);
 	}
 
-	void RendererObject::createPipeline(Device* device, SwapChain* swapChain, Viewport* viewport) 
+	void RendererObject::createPipeline(Device* device, SwapChain* swapChain, VkDescriptorSetLayout* descriptorSetLayout, const std::vector<VkDescriptorSet>& descriptorSets)
 	{
 		//create vertex input ...
 		VkVertexInputBindingDescription bindingDescription = {};
@@ -105,15 +55,16 @@ namespace VkBootstrap
 		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
-		graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport, &vertexInputInfo);
+		graphicPipeline = new GraphicPipeline(device, shader, swapChain, viewport, &vertexInputInfo, descriptorSetLayout, descriptorSets);
 	}
 
-	void RendererObject::render(CommandManager* commandManager, SwapChain* swapChain, uint32_t imageIndex, Viewport* viewport)
+	void RendererObject::render(SwapChain* swapChain, uint32_t imageIndex)
 	{
 		VkBuffer vertexBuffers[] = { dataBuffer->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
 		size_t vertexBufferSize = sizeof(vertices[0]) * vertices.size();
 
+		CommandManager* commandManager = CommandManager::getInstance();
 		Command *command = commandManager->createCommand(graphicPipeline, swapChain);
 		command->begin(imageIndex, viewport);
 
@@ -132,12 +83,6 @@ namespace VkBootstrap
 		{
 			delete shader;
 			shader = nullptr;
-		}
-
-		if (uniformBuffer != nullptr)
-		{
-			delete uniformBuffer;
-			uniformBuffer = nullptr;
 		}
 
 		if (dataBuffer != nullptr) 

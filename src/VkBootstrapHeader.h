@@ -22,9 +22,10 @@
 #include <limits>
 #include <iostream>
 #include <string>
-#include <vector>
-#include <set>
 #include <algorithm>
+#include <array>
+#include <set>
+#include <vector>
 #include <vulkan/vulkan.h>
 
 #include "VkLogger.hpp"

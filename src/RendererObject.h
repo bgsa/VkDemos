@@ -2,7 +2,6 @@
 #define RENDERER_OBJECT_HEADER
 
 #include "VkBootstrapHeader.h"
-#include <array>
 #include "MemoryBuffer.h"
 #include "OpenML.h"
 #include "Shader.h"
@@ -18,17 +17,9 @@ namespace VkBootstrap
 		OpenML::Vec3f color;
 	};
 
-	struct UniformBufferObject {
-		OpenML::Mat4f modelMatrix;
-		OpenML::Mat4f viewMatrix;
-		OpenML::Mat4f projectionMatrix;
-	};
-
 	class RendererObject
 	{
 	private:
-		UniformBufferObject ubo = {};
-
 		const std::vector<Vertex> vertices = { 
 			{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} }, 
 			{ { 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} }, 
@@ -37,23 +28,19 @@ namespace VkBootstrap
 		};
 		const std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
 
-
-		Device *device= nullptr;
+		Device *device = nullptr;
 		Shader *shader = nullptr;
 		MemoryBuffer* dataBuffer = nullptr;
-		MemoryBuffer* uniformBuffer = nullptr;
 		GraphicPipeline *graphicPipeline = nullptr;
 		Viewport *viewport = nullptr;
-
-		Camera camera;
-
-		void createPipeline(Device* device, SwapChain* swapChain, Viewport* viewport);
+				
+		void createPipeline(Device* device, SwapChain* swapChain, VkDescriptorSetLayout* descriptorSetLayout, const std::vector<VkDescriptorSet>& descriptorSets);
 				
 	public:
-		RendererObject(Device* device, SwapChain* swapChain, Viewport* viewport);
+		RendererObject(Device* device, SwapChain* swapChain, Viewport* viewport, VkDescriptorSetLayout* descriptorSetLayout, const std::vector<VkDescriptorSet>& descriptorSets);
 
 		void update(long long elapsedTime);
-		void render(CommandManager* commandManager, SwapChain* swapChain, uint32_t imageIndex, Viewport* viewport);
+		void render(SwapChain* swapChain, uint32_t imageIndex);
 
 		~RendererObject();
 	};

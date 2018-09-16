@@ -13,7 +13,7 @@
 #include "WindowInputDevice.h"
 #include "GraphicPipeline.h"
 #include "CommandManager.h"
-#include "RendererObject.h"
+#include "Renderer.h"
 #include "Timer.h"
 
 #include <thread>
@@ -26,23 +26,20 @@ namespace VkBootstrap
 	{
 
 	private:
-		VkBootstrap::Window *window = nullptr;
+		Window *window = nullptr;
 		VkInstance vulkanInstance = VK_NULL_HANDLE;
 		Device *device = nullptr;
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
-		Viewport *viewport = nullptr;
 		SwapChain *swapChain = nullptr;		
-		CommandManager *commandManager = nullptr;
-		
+		CommandManager *commandManager = nullptr;		
+		Renderer* renderer = nullptr;
+		Timer timer;
+
 		std::vector<VkSemaphore> imageAvailableSemaphore;
 		std::vector<VkSemaphore> renderFinishedSemaphore;
 		std::vector<VkFence> inFlightFences;
 
 		const uint64_t semaphoresTimeout = std::numeric_limits<uint64_t>::max();
-
-		RendererObject *renderObject = nullptr;
-
-		Timer timer;
 
 		bool isRunning = true;
 
@@ -50,10 +47,11 @@ namespace VkBootstrap
 		void setupVulkan();
 		void setupSurface();
 		void setupDevice();
-		void setupSwapChain();
 		void setupSyncObjects();
+		void setupRenderer();
 		void setupDebugCallback();
-		void cleanUpSwapChain();
+		void cleanUpRenderer();
+		void cleanUpSyncObjects();
 
 		uint32_t getImageIndex(size_t currentFrame);
 		void swapBuffer(uint32_t imageIndex, size_t currentFrame);
@@ -67,7 +65,6 @@ namespace VkBootstrap
 		void start();
 		void stop();
 		
-
 		~Application();
 	};
 

@@ -12,6 +12,7 @@ namespace VkBootstrap
 		setupVulkan();
 		setupSurface();
 		setupDevice();
+		setupRenderer();
 
 		start();
 	}
@@ -25,25 +26,20 @@ namespace VkBootstrap
 	void Application::start()
 	{
 		timer.start();
-
-		setupSwapChain();
-
+		
 		size_t currentFrame = 0;
 		uint32_t imageIndex = 0;
 		uint32_t fenceCount = 1;
 		VkBool32 waitAllSemaphores = VK_TRUE;
 
 		isRunning = true;
-		
-		//TODO: remover
-		renderObject = new RendererObject(device, swapChain, viewport);
-		
+				
 		while (isRunning)
 		{
 			long long elapsedTime = timer.getElapsedTime();
 
 			window->update(elapsedTime);
-			renderObject->update(elapsedTime);
+			renderer->update(elapsedTime);
 
 			if (!window->isVisible()) 
 			{
@@ -54,9 +50,9 @@ namespace VkBootstrap
 			vkWaitForFences(device->logicalDevice, 1, &inFlightFences[currentFrame], waitAllSemaphores, semaphoresTimeout);
 			vkResetFences(device->logicalDevice, 1, &inFlightFences[currentFrame]);
 
-			imageIndex = getImageIndex(currentFrame);			
+			imageIndex = getImageIndex(currentFrame);
 
-			renderObject->render(commandManager, swapChain, imageIndex, viewport);
+			renderer->render(imageIndex);
 
 			swapBuffer(imageIndex, currentFrame);
 
@@ -69,10 +65,7 @@ namespace VkBootstrap
 
 		vkDeviceWaitIdle(device->logicalDevice);
 
-		cleanUpSwapChain();
-
-		//TODO: remover
-		delete renderObject;
+		cleanUpRenderer();
 	}
 
 	uint32_t Application::getImageIndex(size_t currentFrame) 
@@ -128,8 +121,8 @@ namespace VkBootstrap
 		{
 			if (operationResult == VK_ERROR_OUT_OF_DATE_KHR)
 			{
-				cleanUpSwapChain();
-				setupSwapChain();
+				cleanUpRenderer();
+				setupRenderer();
 			}
 			else
 				throw std::runtime_error("failed to present command buffer: " + VkHelper::getVkResultDescription(operationResult));
@@ -138,55 +131,17 @@ namespace VkBootstrap
 		vkQueueWaitIdle(device->queueManager->getPresentationQueueFamily()->getQueues()[0]->queue);
 	}
 
-	void Application::setupSwapChain()
+	void Application::setupWindow()
 	{
-		swapChain = SwapChain::createSwapChain(device, surface, window);
-		setupSyncObjects();
-		
-		CommandManager::init(device);
-		commandManager = CommandManager::getInstance();
-	}
+		int width = 800;
+		int height = 600;
 
-	void Application::setupDevice()
-	{
-		std::vector<const char *> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
-		device = new Device(vulkanInstance, surface, requiredExtensions);
-	}
+		VkBootstrap::WindowInfo windowInfo("VkDemo", width, height);
+		windowInfo.setResizable(true);
 
-	void Application::setupSurface()
-	{
-		window->createSurface(vulkanInstance, &surface);
-	}
-
-	void Application::setupSyncObjects()
-	{
-		VkSemaphoreCreateInfo semaphoreInfo = {};
-		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-		VkFenceCreateInfo fenceInfo = {};
-		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-		imageAvailableSemaphore.resize(MAX_FRAMEBUFFER);
-		renderFinishedSemaphore.resize(MAX_FRAMEBUFFER);
-		inFlightFences.resize(MAX_FRAMEBUFFER);
-
-		VkResult operationResult;
-
-		for (size_t i = 0; i != MAX_FRAMEBUFFER; i++)
-		{
-			operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore[i]);
-			if (operationResult != VK_SUCCESS)
-				throw std::runtime_error("failed to create imageAvailableSemaphores!");
-
-			operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore[i]);
-			if (operationResult != VK_SUCCESS)
-				throw std::runtime_error("failed to create renderFinishedSemaphore!");
-
-			operationResult = vkCreateFence(device->logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]);
-			if (operationResult != VK_SUCCESS)
-				throw std::runtime_error("failed to create fence in flight!");
-		}
+		window = new VkBootstrap::Window;
+		window->setup(windowInfo);
+		window->addHandler(this);
 	}
 
 	void Application::setupVulkan()
@@ -236,19 +191,96 @@ namespace VkBootstrap
 #endif
 	}
 
-	void Application::setupWindow()
+	void Application::setupSurface()
 	{
-		int width = 800;
-		int height = 600;
+		window->createSurface(vulkanInstance, &surface);
+	}
 
-		VkBootstrap::WindowInfo windowInfo("VkDemo", width, height);
-		windowInfo.setResizable(true);
+	void Application::setupDevice()
+	{
+		std::vector<const char *> requiredExtensions = VkPhysicalDeviceManager::getRequiredExtensionsForGraphic();
+		device = new Device(vulkanInstance, surface, requiredExtensions);
+	}
 
-		window = new VkBootstrap::Window;
-		window->setup(windowInfo);
-		window->addHandler(this);
+	void Application::setupSyncObjects()
+	{
+		VkSemaphoreCreateInfo semaphoreInfo = {};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-		viewport = new Viewport(width, height);
+		VkFenceCreateInfo fenceInfo = {};
+		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		imageAvailableSemaphore.resize(MAX_FRAMEBUFFER);
+		renderFinishedSemaphore.resize(MAX_FRAMEBUFFER);
+		inFlightFences.resize(MAX_FRAMEBUFFER);
+
+		VkResult operationResult;
+
+		for (size_t i = 0; i != MAX_FRAMEBUFFER; i++)
+		{
+			operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore[i]);
+			if (operationResult != VK_SUCCESS)
+				throw std::runtime_error("failed to create imageAvailableSemaphores!");
+
+			operationResult = vkCreateSemaphore(device->logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore[i]);
+			if (operationResult != VK_SUCCESS)
+				throw std::runtime_error("failed to create renderFinishedSemaphore!");
+
+			operationResult = vkCreateFence(device->logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]);
+			if (operationResult != VK_SUCCESS)
+				throw std::runtime_error("failed to create fence in flight!");
+		}
+	}
+
+	void Application::cleanUpSyncObjects() 
+	{
+		for (VkSemaphore semaphore : renderFinishedSemaphore)
+			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
+		renderFinishedSemaphore.clear();
+
+		for (VkSemaphore semaphore : imageAvailableSemaphore)
+			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
+		imageAvailableSemaphore.clear();
+
+		for (VkFence fence : inFlightFences)
+			vkDestroyFence(device->logicalDevice, fence, nullptr);
+		inFlightFences.clear();
+	}
+
+	void Application::setupRenderer()
+	{
+		swapChain = SwapChain::createSwapChain(device, surface, window);
+		setupSyncObjects();
+
+		CommandManager::init(device);
+		commandManager = CommandManager::getInstance();
+
+		Size windowSize = window->getSize();
+
+		if (renderer == nullptr) 
+			renderer = new Renderer(device, swapChain, windowSize);
+		else
+			renderer->setSwapChain(swapChain);
+	}
+
+	void Application::cleanUpRenderer()
+	{
+		vkDeviceWaitIdle(device->logicalDevice);
+
+		if (commandManager != nullptr)
+		{
+			delete commandManager;
+			commandManager = nullptr;
+		}
+
+		if (swapChain != nullptr)
+		{
+			delete swapChain;
+			swapChain = nullptr;
+		}
+
+		cleanUpSyncObjects();
 	}
 
 	void Application::setupDebugCallback()
@@ -280,47 +312,18 @@ namespace VkBootstrap
 
 	void Application::window_OnResize(int width, int height)
 	{
-		viewport->setSize(width, height);
-	}
-
-	void Application::cleanUpSwapChain()
-	{
-		vkDeviceWaitIdle(device->logicalDevice);
-
-		if (commandManager != nullptr)
-		{
-			delete commandManager;
-			commandManager = nullptr;
-		}
-
-		if (swapChain != nullptr)
-		{
-			delete swapChain;
-			swapChain = nullptr;
-		}
-
-		for (VkSemaphore semaphore : renderFinishedSemaphore)
-			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
-		renderFinishedSemaphore.clear();
-
-		for (VkSemaphore semaphore : imageAvailableSemaphore)
-			vkDestroySemaphore(device->logicalDevice, semaphore, nullptr);
-		imageAvailableSemaphore.clear();
-
-		for (VkFence fence : inFlightFences)
-			vkDestroyFence(device->logicalDevice, fence, nullptr);
-		inFlightFences.clear();
+		renderer->resize(width, height);
 	}
 
 	void Application::exit()
 	{
-		cleanUpSwapChain();
-
-		if (viewport != nullptr)
+		if (renderer != nullptr)
 		{
-			delete viewport;
-			viewport = nullptr;
+			delete renderer;
+			renderer = nullptr;
 		}
+
+		cleanUpRenderer();
 
 		if (device != nullptr)
 		{
