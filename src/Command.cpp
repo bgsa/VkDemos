@@ -1,4 +1,5 @@
 #include "Command.h"
+#include "Renderer.h"
 
 namespace VkBootstrap
 {
@@ -24,6 +25,8 @@ namespace VkBootstrap
 
 	void Command::begin(size_t frameBufferIndex, Viewport* viewport)
 	{
+		Renderer* renderer = Renderer::getInstance();
+
 		VkRenderPassBeginInfo renderPassInfo = swapChain->getRenderPassBegin(frameBufferIndex);
 
 		VkCommandBufferBeginInfo beginInfo = {};
@@ -35,6 +38,15 @@ namespace VkBootstrap
 
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 			throw std::runtime_error("failed to begin recording command buffer!");
+
+		if ( ! renderer->memoryBufferBarriers.empty() )
+		{
+			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+				0,
+				0, NULL,
+				(uint32_t)renderer->memoryBufferBarriers.size(), renderer->memoryBufferBarriers.data(),
+				0, NULL);
+		}
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicPipeline->graphicPipeline);

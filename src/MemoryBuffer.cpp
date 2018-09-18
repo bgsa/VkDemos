@@ -89,6 +89,22 @@ namespace VkBootstrap
 		return vertexBuffer;
 	}
 
+	VkBufferMemoryBarrier MemoryBuffer::createBarrier()
+	{
+		memoryBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+		memoryBufferBarrier.pNext = nullptr;
+		memoryBufferBarrier.buffer = vertexBuffer;
+		memoryBufferBarrier.size = VK_WHOLE_SIZE;
+		memoryBufferBarrier.offset = 0;
+		memoryBufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		memoryBufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		memoryBufferBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+		memoryBufferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		//memoryBufferBarrier.dstAccessMask = VK_ACCESS_UNIFORM_READ_BIT;
+		
+		return memoryBufferBarrier;
+	}
+
 	MemoryBuffer::~MemoryBuffer()
 	{
 		vkDestroyBuffer(device->logicalDevice, vertexBuffer, nullptr);

@@ -27,7 +27,7 @@ namespace VkBootstrap
 
 		inline size_t getCommandsCount();
 		VkCommandBuffer* getCommandBuffers();
-
+		
 		static void init(const Device *device);
 		Command *createCommand(GraphicPipeline *graphicPipeline, SwapChain *swapChain);
 		CopyCommand *createCopyCommand();

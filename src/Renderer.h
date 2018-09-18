@@ -2,12 +2,7 @@
 #define RENDERER_HEADER
 
 #include "VkBootstrapHeader.h"
-#include <array>
 #include "MemoryBuffer.h"
-#include "OpenML.h"
-#include "Shader.h"
-#include "GraphicPipeline.h"
-#include "CommandManager.h"
 #include "Camera.h"
 #include "RendererObject.h"
 
@@ -26,12 +21,12 @@ namespace VkBootstrap
 
 		Device *device = nullptr;
 		SwapChain* swapChain = nullptr;
-		MemoryBuffer* uniformBuffer = nullptr;
 		Viewport *viewport = nullptr;
-		
+		MemoryBuffer* uniformBuffer = nullptr;
+				
 		VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 		VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-		std::vector<VkDescriptorSet> descriptorSets;
+		std::vector<VkDescriptorSet> descriptorSets;		
 
 		void createDescriptorPool(const Device* device);
 		void createDescriptorSetLayout(const Device* device);
@@ -39,9 +34,14 @@ namespace VkBootstrap
 
 		Camera camera;
 		RendererObject* rendererObject = nullptr;
-						
-	public:
+			
 		Renderer(Device* device, SwapChain* swapChain, Size windowSize);
+
+	public:
+		std::vector<VkBufferMemoryBarrier> memoryBufferBarriers;
+
+		static void init(Device* device, SwapChain* swapChain, Size windowSize);
+		static Renderer* getInstance();
 
 		void setSwapChain(SwapChain* swapChain);
 

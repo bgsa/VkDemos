@@ -2,6 +2,7 @@
 
 namespace VkBootstrap
 {
+	Renderer* instance = nullptr;
 
 	Renderer::Renderer(Device* device, SwapChain* swapChain, Size windowSize)
 	{
@@ -14,7 +15,7 @@ namespace VkBootstrap
 		Vec3f cameraTarget = { 0.0f, 3.0f, 0.0f };
 		camera.init(cameraPosition, cameraTarget);
 		camera.setPerspective(90.0f, aspectRatio, 1.0f, 1000.0f);
-	   
+
 		//ubo.projectionMatrix = camera.getProjectionMatrix().clone();
 		ubo.projectionMatrix = camera.getHUDProjectionMatrix((float)viewport->getWidth(), (float)viewport->getHeight());
 		ubo.viewMatrix = camera.getViewMatrix().clone();
@@ -23,16 +24,31 @@ namespace VkBootstrap
 			0.0f, 300.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
 			300.0f, 300.0f, 0.0f, 1.0f };
-		
+
 		//ubo.projectionMatrix[5] *= -1;
-		
+
 		uniformBuffer = new MemoryBuffer(device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(UniformBufferObject), &ubo);
+		memoryBufferBarriers.push_back(uniformBuffer->createBarrier());
+
 
 		createDescriptorPool(device);
 		createDescriptorSetLayout(device);
 		createDescriptorSets(device);
 
 		rendererObject = new RendererObject(device, swapChain, viewport, &descriptorSetLayout, descriptorSets);
+	}
+
+	void Renderer::init(Device* device, SwapChain* swapChain, Size windowSize)
+	{
+		if (instance != nullptr)
+			delete instance;
+
+		instance = new Renderer(device, swapChain, windowSize);
+	}
+
+	Renderer* Renderer::getInstance() 
+	{
+		return instance;
 	}
 
 	void Renderer::setSwapChain(SwapChain* swapChain) 
@@ -115,7 +131,7 @@ namespace VkBootstrap
 		descriptorWrite.pTexelBufferView = nullptr; // Optional
 
 		vkUpdateDescriptorSets(device->logicalDevice, 1, &descriptorWrite, 0, nullptr);
-
+		
 		rendererObject->update(elapsedTime);
 	}
 

@@ -258,8 +258,11 @@ namespace VkBootstrap
 
 		Size windowSize = window->getSize();
 
-		if (renderer == nullptr) 
-			renderer = new Renderer(device, swapChain, windowSize);
+		if (renderer == nullptr)
+		{
+			Renderer::init(device, swapChain, windowSize);
+			renderer = Renderer::getInstance();
+		}
 		else
 			renderer->setSwapChain(swapChain);
 	}

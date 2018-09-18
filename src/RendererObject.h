@@ -3,11 +3,8 @@
 
 #include "VkBootstrapHeader.h"
 #include "MemoryBuffer.h"
-#include "OpenML.h"
 #include "Shader.h"
 #include "GraphicPipeline.h"
-#include "CommandManager.h"
-#include "Camera.h"
 
 namespace VkBootstrap
 {

@@ -35,4 +35,12 @@
 
 #include <OpenML.h>
 
+namespace VkBootstrap 
+{
+	class Renderer;
+	class CommandManager;
+	class Command;
+	class CopyCommand;
+}
+
 #endif

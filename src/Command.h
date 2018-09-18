@@ -7,7 +7,6 @@
 
 namespace VkBootstrap
 {
-
 	class Command
 	{
 	private:
@@ -26,7 +25,6 @@ namespace VkBootstrap
 
 		~Command();
 	};
-
 }
 
 #endif
